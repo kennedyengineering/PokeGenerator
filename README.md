@@ -10,3 +10,9 @@ CSC 587 Final Project, Winter 2024, Jonathan Ventura
 ```
 ./setup.sh
 ```
+
+## Running Examples
+```
+source venv/bin/activate
+python3 <script>.py
+```
