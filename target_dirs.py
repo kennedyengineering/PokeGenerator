@@ -57,6 +57,6 @@ def get_directories(data_dir):
 
 def get_blacklist(data_dir):
    blacklist =  [
-      data_dir + '/pokemon/versions/generation-v/black-white/10186.png'
+      '/pokemon/versions/generation-v/black-white/10186.png'
    ]
-   return [pathlib.PosixPath(s) for s in blacklist]
+   return [pathlib.PosixPath(data_dir + s) for s in blacklist]
