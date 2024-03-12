@@ -12,27 +12,26 @@ CONFIG_FILE = "dataset_config.json"
 BLACKLIST_FILE = "blacklist.json"
 
 
-def has_black_background(rgb_img):
-    """Returns True if the image background is black, otherwise False
-    It assumes the majority of the image's border pixels are the background color.
+def RGBA_to_RGB(rgba_img):
+    """Converts a RGBA image to an RGB image
+
+    NOTES:
+    If the alpha channel does not create a clean mask (i.e, contains values other then 0 or 255)
+    then the resulting image cannot be cleanly shown with a black background.
+
+    For this reason, a white background is used instead of black.
     """
-    top_rows = rgb_img[0, :, :]
-    bottom_rows = rgb_img[-1, :, :]
-    left_cols = rgb_img[:, 0, :]
-    right_cols = rgb_img[:, -1, :]
-    together = np.reshape(
-        np.concatenate([top_rows, bottom_rows, left_cols, right_cols], axis=0), [-1]
-    )
-    vals, counts = np.unique(together, return_counts=True)
-    return vals[np.argmax(counts)] == 0.0
 
-
-def RGBA_to_black_background(rgba_img):
-    """Converts a non-black background rgba image to a black background rgb image"""
+    # Split the RGB and A channels
     rgb = rgba_img[:, :, :3]
-    a = rgba_img[:, :, 3]
-    black = rgb * (np.expand_dims(a, axis=-1) / 255)
-    return black
+    alpha = rgba_img[:, :, 3]
+
+    # Use A channel as mask of Pokemon
+    img = np.ones_like(rgb) * 255
+    idx = alpha != 0
+    img[idx] = rgb[idx]
+
+    return img
 
 
 def main():
@@ -72,7 +71,7 @@ def main():
         filtered_image_paths = [
             os.path.join(config["source_directory"], f)
             for f in raw_image_paths
-            if f not in blacklist["bad_files"]
+            if f not in blacklist["bad_files"] or not config["apply_blacklist"]
         ]
 
         image_paths.extend(filtered_image_paths)
@@ -82,18 +81,16 @@ def main():
 
     # Process images
     for i, path in enumerate(image_paths):
+        # Load image from disk
         image = iio.imread(path)
         output_path = os.path.join(config["output_directory"], f"{i}.png")
 
-        if has_black_background(image):
-            # Save black background images to disk
-            iio.imwrite(output_path, image)
-        elif image.shape[2] == 4:
-            # Convert RGBA images to black background images
-            iio.imwrite(output_path, RGBA_to_black_background(image))
-        else:
-            # Report error condition
-            print(f"ERROR: Cannot process image {path}")
+        # Remove A channel
+        if image.shape[2] == 4:
+            image = RGBA_to_RGB(image)
+
+        # Save image to disk
+        iio.imwrite(output_path, image)
 
 
 if __name__ == "__main__":
