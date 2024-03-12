@@ -118,6 +118,8 @@ def main():
         pokes += list(d.with_suffix('').glob('*.png'))
     #pokes_count = len(pokes)
 
+
+
     #filter blacklisted    
     pokes = [p for p in pokes if p not in blacklist]
    

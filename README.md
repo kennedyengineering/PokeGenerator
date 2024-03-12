@@ -11,6 +11,13 @@ CSC 587 Final Project, Winter 2024, Jonathan Ventura
 ./setup.sh
 ```
 
+## Preprocessing
+
+Assuming the PokeAPI sprites file is in the same folder as preprocessing.py
+```
+python preprocessing.py sprites-master/sprites <path to target directory>
+```
+
 ## Running Examples
 ```
 source venv/bin/activate
