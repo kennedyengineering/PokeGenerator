@@ -118,11 +118,9 @@ def main():
         pokes += list(d.with_suffix('').glob('*.png'))
     #pokes_count = len(pokes)
 
-
-
     #filter blacklisted    
     pokes = [p for p in pokes if p not in blacklist]
-   
+ 
 
     #black background pokemon get saved to target_dir
     #white background pokemon are converted to black background and then saved
