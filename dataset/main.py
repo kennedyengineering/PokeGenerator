@@ -37,7 +37,9 @@ def RGBA_to_black_background(rgba_img):
 
 def main():
     # Parse arguments
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument(
         "--config_file",
         help="Config JSON File",
@@ -58,9 +60,7 @@ def main():
 
     # Load paths of images
     image_paths = []
-    for path in blacklist[
-        "good_directories"
-    ]:  # FIXME: Blacklist unwanted directories, instead of manually specifing the goodones. Then the apply blacklist switch can turn off the filtering, and file discovery can happen organically, if desired.
+    for path in blacklist["good_directories"]:
         # Read all images
         raw_image_paths = [
             os.path.join(path, f)
