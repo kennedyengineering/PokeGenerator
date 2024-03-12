@@ -12,6 +12,33 @@ CONFIG_FILE = "dataset_config.json"
 BLACKLIST_FILE = "blacklist.json"
 
 
+def draw_bounding_box(bbox, rgb_img, color=(100, 100, 100)):
+    """Renders bounding box on image
+
+    Receives bounding box in form [x, y, w, h]
+    """
+
+    rgb_img[bbox[1], bbox[0] : bbox[0] + bbox[2]] = color
+    rgb_img[bbox[1] : bbox[1] + bbox[3], bbox[0]] = color
+    rgb_img[bbox[1] + bbox[3], bbox[0] : bbox[0] + bbox[2]] = color
+    rgb_img[bbox[1] : bbox[1] + bbox[3], bbox[0] + bbox[2]] = color
+
+    return rgb_img
+
+
+def find_bounding_box(rgb_img):
+    """Return bounding box of sprite
+
+    In form [x, y, w, h] where x, y are bottom left coordinates
+    """
+
+    a = np.where(rgb_img != (255, 255, 255))
+    bbox = np.min(a[1]), np.min(a[0]), np.max(a[1]), np.max(a[0])
+    bbox = bbox[0], bbox[1], bbox[2] - bbox[0], bbox[3] - bbox[1]
+
+    return bbox
+
+
 def RGBA_to_RGB(rgba_img):
     """Converts a RGBA image to an RGB image
 
@@ -88,6 +115,12 @@ def main():
         # Remove A channel
         if image.shape[2] == 4:
             image = RGBA_to_RGB(image)
+
+        # Compute bounding box
+        bbox = find_bounding_box(image)
+        print(bbox)
+
+        image = draw_bounding_box(bbox, image)
 
         # Save image to disk
         iio.imwrite(output_path, image)
