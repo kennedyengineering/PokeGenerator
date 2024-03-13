@@ -80,9 +80,8 @@ def main():
     checkpoint_directory = Path(config["checkpoint_directory"])
     checkpoint_directory.mkdir(exist_ok=True)
     model.save(
-        checkpoint_directory / "model_"
-        + datetime.datetime.now().strftime("%Y-%m-%d-%H:%M:%S%z")
-        + ".keras"
+        checkpoint_directory
+        / ("model_" + datetime.now().strftime("%Y-%m-%d-%H:%M:%S%z") + ".keras")
     )
 
 
