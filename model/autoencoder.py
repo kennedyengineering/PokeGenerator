@@ -5,6 +5,8 @@ from tensorflow.keras.layers import Input, Flatten, Dense, Reshape
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.optimizers import Adam
 
+# FIXME: Update autoencoder model for new image size
+
 
 def build_encoder(latent_dim):
     """Build the encoder architecture"""
