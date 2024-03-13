@@ -1,0 +1,35 @@
+{
+  "bad_files": [
+    "sprites/pokemon/versions/generation-v/black-white/10186.png"
+  ],
+  "good_directories": [
+    "sprites/pokemon/versions/generation-vii/ultra-sun-ultra-moon",
+    "sprites/pokemon/versions/generation-vii/ultra-sun-ultra-moon/shiny",
+    "sprites/pokemon/versions/generation-vii/ultra-sun-ultra-moon/shiny/female",
+    "sprites/pokemon/versions/generation-vii/ultra-sun-ultra-moon/female",
+    "sprites/pokemon/versions/generation-vi/x-y",
+    "sprites/pokemon/versions/generation-vi/x-y/shiny",
+    "sprites/pokemon/versions/generation-vi/x-y/shiny/female",
+    "sprites/pokemon/versions/generation-vi/x-y/female",
+    "sprites/pokemon/versions/generation-vi/omegaruby-alphasapphire",
+    "sprites/pokemon/versions/generation-vi/omegaruby-alphasapphire/shiny",
+    "sprites/pokemon/versions/generation-vi/omegaruby-alphasapphire/shiny/female",
+    "sprites/pokemon/versions/generation-vi/omegaruby-alphasapphire/female",
+    "sprites/pokemon/versions/generation-v/black-white",
+    "sprites/pokemon/versions/generation-v/black-white/shiny",
+    "sprites/pokemon/versions/generation-v/black-white/shiny/female",
+    "sprites/pokemon/versions/generation-v/black-white/female",
+    "sprites/pokemon/versions/generation-iv/heartgold-soulsilver",
+    "sprites/pokemon/versions/generation-iv/heartgold-soulsilver/shiny",
+    "sprites/pokemon/versions/generation-iv/heartgold-soulsilver/shiny/female",
+    "sprites/pokemon/versions/generation-iv/heartgold-soulsilver/female",
+    "sprites/pokemon/versions/generation-iv/diamond-pearl",
+    "sprites/pokemon/versions/generation-iv/diamond-pearl/shiny",
+    "sprites/pokemon/versions/generation-iv/diamond-pearl/shiny/female",
+    "sprites/pokemon/versions/generation-iv/diamond-pearl/female",
+    "sprites/pokemon/versions/generation-iv/platinum",
+    "sprites/pokemon/versions/generation-iv/platinum/shiny",
+    "sprites/pokemon/versions/generation-iv/platinum/shiny/female",
+    "sprites/pokemon/versions/generation-iv/platinum/female"
+  ]
+}

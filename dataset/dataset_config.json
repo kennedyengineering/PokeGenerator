@@ -1,0 +1,6 @@
+{
+  "apply_blacklist": true,
+  "output_directory": "dataset",
+  "source_directory": "../../final_project_shared/sprites",
+  "sprite_size": 100
+}
