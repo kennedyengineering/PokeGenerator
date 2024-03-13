@@ -6,10 +6,71 @@ import json
 import argparse
 import numpy as np
 import imageio.v3 as iio
+import cv2
+from tqdm import tqdm
 
 
 CONFIG_FILE = "dataset_config.json"
 BLACKLIST_FILE = "blacklist.json"
+
+
+def crop_bounding_square(bbox, rgb_img):
+    """Returns the contents of the image inside the sqaure bounding box of the bounding box
+
+    Receives bounding box in form [x, y, w, h]
+    """
+
+    side_length = max(bbox[2], bbox[3])
+    center_point = bbox[0] + bbox[2] / 2, bbox[1] + bbox[3] / 2
+    new_bbox = (
+        int(center_point[0] - side_length / 2),
+        int(center_point[1] - side_length / 2),
+        side_length,
+        side_length,
+    )
+
+    return crop_bounding_box(new_bbox, rgb_img)
+
+
+def crop_bounding_box(bbox, rgb_img):
+    """Returns the contents of the image inside the bounding box
+
+    Receives bounding box in form [x, y, w, h]
+    """
+
+    # Extend image dimensions if necessary
+    x1 = bbox[0]
+    x2 = bbox[0] + bbox[2] + 1
+    y1 = bbox[1]
+    y2 = bbox[1] + bbox[3] + 1
+
+    if x1 < 0:
+        padding = (
+            np.ones((rgb_img.shape[0], abs(x1), rgb_img.shape[2]), dtype=rgb_img.dtype)
+            * 255
+        )
+        x2 += abs(x1)
+        x1 = 0
+        rgb_img = np.concatenate([padding, rgb_img], axis=1)
+
+    if y1 < 0:
+        padding = (
+            np.ones((abs(y1), rgb_img.shape[1], rgb_img.shape[2]), dtype=rgb_img.dtype)
+            * 255
+        )
+        y2 += abs(y1)
+        y1 = 0
+        rgb_img = np.concatenate([padding, rgb_img], axis=0)
+
+    if x2 > rgb_img.shape[1]:
+        # TODO: populate if needed
+        pass
+
+    if y2 > rgb_img.shape[0]:
+        # TODO: populate if needed
+        pass
+
+    return rgb_img[y1:y2, x1:x2]
 
 
 def draw_bounding_box(bbox, rgb_img, color=(100, 100, 100)):
@@ -27,9 +88,9 @@ def draw_bounding_box(bbox, rgb_img, color=(100, 100, 100)):
 
 
 def find_bounding_box(rgb_img):
-    """Return bounding box of sprite
+    """Finds bounding box of sprite
 
-    In form [x, y, w, h] where x, y are bottom left coordinates
+    Returns bounding box in form [x, y, w, h] where x, y are bottom left coordinates
     """
 
     a = np.where(rgb_img != (255, 255, 255))
@@ -107,7 +168,9 @@ def main():
     os.mkdir(config["output_directory"])
 
     # Process images
-    for i, path in enumerate(image_paths):
+    for i, path in enumerate(
+        tqdm(image_paths, desc="Generating Pokemon Sprite Dataset")
+    ):
         # Load image from disk
         image = iio.imread(path)
         output_path = os.path.join(config["output_directory"], f"{i}.png")
@@ -118,9 +181,16 @@ def main():
 
         # Compute bounding box
         bbox = find_bounding_box(image)
-        print(bbox)
 
-        image = draw_bounding_box(bbox, image)
+        # Crop the image
+        image = crop_bounding_square(bbox, image)
+
+        # Resize the image
+        image = cv2.resize(
+            image,
+            dsize=(config["sprite_size"], config["sprite_size"]),
+            interpolation=cv2.INTER_CUBIC,
+        )
 
         # Save image to disk
         iio.imwrite(output_path, image)

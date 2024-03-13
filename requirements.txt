@@ -1,3 +1,5 @@
 tensorflow[and-cuda]
 pre-commit
 imageio
+opencv-python
+tqdm
