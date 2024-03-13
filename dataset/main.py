@@ -172,7 +172,7 @@ def main():
         tqdm(image_paths, desc="Generating Pokemon Sprite Dataset")
     ):
         # Load image from disk
-        image = iio.imread(path)
+        image = iio.imread(path, pilmode="RGBA")
         output_path = os.path.join(config["output_directory"], f"{i}.png")
 
         # Remove A channel
