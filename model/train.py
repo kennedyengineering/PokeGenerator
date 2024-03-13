@@ -65,13 +65,19 @@ def main():
 
     # Build and train model
     model, _, _ = build_model()
-    np.random.shuffle(images)
     history = model.fit(
+        images,
         images,
         batch_size=config["batch_size"],
         epochs=config["epochs"],
         validation_split=config["validation_split"],
+        shuffle=True,
     )
+
+    # Save the model
+    checkpoint_directory = Path(config["checkpoint_directory"])
+    checkpoint_directory.mkdir(exist_ok=True)
+    model.save(checkpoint_directory / "model.keras")
 
 
 if __name__ == "__main__":
