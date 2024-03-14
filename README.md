@@ -11,8 +11,13 @@ CSC 587 Final Project, Winter 2024, Jonathan Ventura
 ./setup.sh
 ```
 
-## Running Examples
+## Environment Activation
 ```
 source venv/bin/activate
-python3 <script>.py
 ```
+
+## Dataset Creation
+`cd dataset` and see `README.md`
+
+## Training Model
+`cd model` and see `README.md`

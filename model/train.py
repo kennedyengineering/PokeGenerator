@@ -4,6 +4,7 @@
 import argparse
 import json
 from pathlib import Path
+from datetime import datetime
 import imageio.v3 as iio
 import numpy as np
 from autoencoder import build_model
@@ -65,12 +66,22 @@ def main():
 
     # Build and train model
     model, _, _ = build_model()
-    np.random.shuffle(images)
     history = model.fit(
+        images,
         images,
         batch_size=config["batch_size"],
         epochs=config["epochs"],
         validation_split=config["validation_split"],
+        shuffle=True,
+    )
+
+    # Save the model
+    # TODO: Add checkpointing, save models every X epochs to an directory corresponding to a training run
+    checkpoint_directory = Path(config["checkpoint_directory"])
+    checkpoint_directory.mkdir(exist_ok=True)
+    model.save(
+        checkpoint_directory
+        / ("model_" + datetime.now().strftime("%Y-%m-%d-%H:%M:%S%z") + ".keras")
     )
 
 

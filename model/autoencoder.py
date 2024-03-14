@@ -5,17 +5,17 @@ from tensorflow.keras.layers import Input, Flatten, Dense, Reshape
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.optimizers import Adam
 
-# FIXME: Update autoencoder model for new image size
-
 
 def build_encoder(latent_dim):
     """Build the encoder architecture"""
     return Sequential(
         [
-            Input(shape=(28, 20), name="encoder_input"),
+            Input(shape=(100, 100, 3), name="encoder_input"),
             Flatten(),
-            Dense(64, activation="relu", name="encoder_hidden_1"),
-            Dense(32, activation="relu", name="encoder_hidden_2"),
+            Dense(256, activation="relu", name="encoder_hidden_1"),
+            Dense(128, activation="relu", name="encoder_hidden_2"),
+            Dense(64, activation="relu", name="encoder_hidden_3"),
+            Dense(32, activation="relu", name="encoder_hidden_4"),
             Dense(latent_dim, activation="tanh", name="encoder_embedding"),
         ],
         name="encoder",
@@ -29,8 +29,10 @@ def build_decoder(latent_dim):
             Input(latent_dim, name="decoder_input"),
             Dense(32, activation="relu", name="decoder_hidden_1"),
             Dense(64, activation="relu", name="decoder_hidden_2"),
-            Dense(28 * 20, activation="linear", name="decoder_output"),
-            Reshape((28, 20)),
+            Dense(128, activation="relu", name="decoder_hidden_3"),
+            Dense(256, activation="relu", name="decoder_hidden_4"),
+            Dense(100 * 100 * 3, activation="linear", name="decoder_output"),
+            Reshape((100, 100, 3)),
         ],
         name="decoder",
     )
@@ -38,7 +40,7 @@ def build_decoder(latent_dim):
 
 def build_autoencoder(encoder, decoder):
     """Build the autoencoder architecture"""
-    inputs = Input((28, 20), name="autoencoder_input")
+    inputs = Input((100, 100, 3), name="autoencoder_input")
     embedding = encoder(inputs)
     reconstruction = decoder(embedding)
     return Model(inputs=inputs, outputs=reconstruction, name="autoencoder")
