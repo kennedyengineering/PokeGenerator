@@ -1,8 +1,8 @@
 {
   "batch_size": 32,
   "checkpoint_directory": "checkpoints",
-  "dataset_cache": "/datasets/Pokemon_Sprites/dataset_128_cache.npy",
-  "dataset_directory": "/datasets/Pokemon_Sprites/dataset_128",
-  "epochs": 5,
+  "dataset_cache": "./dataset_128_cache.npy",
+  "dataset_directory": "/datasets/poke128",
+  "epochs": 300,
   "validation_split": 0.1
 }
