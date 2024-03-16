@@ -7,7 +7,10 @@ from pathlib import Path
 from datetime import datetime
 import imageio.v3 as iio
 import numpy as np
-from autoencoder import build_model
+
+# TODO: Add option to select model to train
+# from autoencoder import build_model
+from conv_autoencoder import build_model
 
 
 CONFIG_FILE = "training_config.json"
@@ -15,6 +18,8 @@ CONFIG_FILE = "training_config.json"
 
 def load_dataset(config):
     """Load images from dataset directory and cache"""
+
+    # TODO: Add cache toggle switch in config file
 
     # Load cache if exists
     if Path(config["dataset_cache"]).is_file():
@@ -61,7 +66,7 @@ def main():
     # Load the dataset
     images = load_dataset(config)
 
-    # Preprocess the dataset
+    # Preprocess the dataset (Normalize to [-1, 1] range)   # FIXME: is [0 1 range better?]
     images = (images.astype(np.float32) / 127.5) - 1.0
 
     # Build and train model
@@ -71,12 +76,13 @@ def main():
         images,
         batch_size=config["batch_size"],
         epochs=config["epochs"],
-        validation_split=config["validation_split"],
+        # validation_split=config["validation_split"],  # FIXME: Does autoencoder need validation data split?
         shuffle=True,
     )
 
     # Save the model
     # TODO: Add checkpointing, save models every X epochs to an directory corresponding to a training run
+    # TODO: Use callbacks to save model checkpoints, and produce example inference image (to show progression)
     checkpoint_directory = Path(config["checkpoint_directory"])
     checkpoint_directory.mkdir(exist_ok=True)
     model.save(

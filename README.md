@@ -2,7 +2,7 @@
 CSC 587 Final Project, Winter 2024, Jonathan Ventura
 
 - Braedan Kennedy (bkenne07@calpoly.edu)
-- Luis David Garcia ()
+- Luis David Garcia (lgarc120@calpoly.edu)
 - Paul Jarski ()
 - Briana Kuo ()
 
