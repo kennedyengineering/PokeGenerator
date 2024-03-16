@@ -44,7 +44,7 @@ def build_decoder(encoder, kernel_shape=(5, 5)):
             UpSampling2D((2, 2)),
             Conv2D(16, kernel_shape, activation="swish", padding="same"),
             UpSampling2D((2, 2)),
-            Conv2D(1, kernel_shape, activation="sigmoid", padding="same"),
+            Conv2D(3, kernel_shape, activation="sigmoid", padding="same"),
         ],
         name="decoder",
     )
