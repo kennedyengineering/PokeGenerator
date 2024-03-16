@@ -66,8 +66,9 @@ def main():
     # Load the dataset
     images = load_dataset(config)
 
-    # Preprocess the dataset (Normalize to [-1, 1] range)   # FIXME: is [0 1 range better?]
-    images = (images.astype(np.float32) / 127.5) - 1.0
+    # Preprocess the dataset (Normalize to [-1, 1] range)   # FIXME: is [0 1 range better?] -- is necessary for binary_crossentropy loss
+    # images = (images.astype(np.float32) / 127.5) - 1.0
+    images = images.astype(np.float32) / 255.0
 
     # Build and train model
     model, _, _ = build_model()
