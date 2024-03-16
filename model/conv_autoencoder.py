@@ -6,6 +6,8 @@ from tensorflow.keras.layers import (
     Conv2D,
     MaxPooling2D,
     UpSampling2D,
+    Reshape,
+    Flatten,
 )
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.optimizers import Adam
@@ -25,10 +27,10 @@ def build_encoder(input_shape=(128, 128, 3), kernel_shape=(5, 5)):
             MaxPooling2D((2, 2), padding="same"),
             Conv2D(128, kernel_shape, activation="tanh", padding="same"),
             MaxPooling2D((2, 2), padding="same"),
+            Flatten()
         ],
         name="encoder",
     )
-
 
 def build_decoder(encoder, kernel_shape=(5, 5)):
     """Bulid the decoder architecture"""
@@ -36,6 +38,7 @@ def build_decoder(encoder, kernel_shape=(5, 5)):
     return Sequential(
         [
             Input(shape=encoder.layers[-1].output_shape[1:]),
+            Reshape((8, 8, 128), input_shape=(8*8*128,)),
             Conv2D(128, kernel_shape, activation="swish", padding="same"),
             UpSampling2D((2, 2)),
             Conv2D(64, kernel_shape, activation="swish", padding="same"),

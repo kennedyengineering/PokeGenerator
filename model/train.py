@@ -71,7 +71,8 @@ def main():
     images = images.astype(np.float32) / 255.0
 
     # Build and train model
-    model, _, _ = build_model()
+    model, encoder, decoder = build_model()
+
     history = model.fit(
         images,
         images,
