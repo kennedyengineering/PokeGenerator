@@ -74,7 +74,7 @@ def main():
     latent_vectors = encoder.predict(images)
     latent_model = training(
         latent_vectors, batch_size, T, 
-        alphas_cumprod, latent_model, epochs=500
+        alphas_cumprod, latent_model, epochs=200
     )
 
     # Save Model

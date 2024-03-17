@@ -45,7 +45,7 @@ def training(latent_vectors, batch_size, T, alphas_cumprod, model, epochs=100):
     train_dataset = tf.data.Dataset.from_tensor_slices(latent_vectors)
     train_dataset = train_dataset.shuffle(buffer_size=1024).batch(batch_size)
 
-    opt = keras.optimizers.Adam(9e-4)
+    opt = keras.optimizers.Adam(3e-4)
     loss_fn = keras.losses.MeanSquaredError()
 
     for epoch in range(epochs):
