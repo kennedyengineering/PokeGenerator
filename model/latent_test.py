@@ -56,7 +56,7 @@ def main():
     # display_images(rgb_predictions[:10]) 
 
     input_dim = 8192
-    num_layers = 8    # Number of hidden layers
+    num_layers = 32    # Number of hidden layers
     num_hidden = 800  # Number of neurons in each hidden layer
     T = 1000
     latent_model = build_reverse_process_mlp_model(input_dim, num_layers, num_hidden, T)
