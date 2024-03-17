@@ -9,7 +9,7 @@ from pathlib import Path
 from datetime import datetime
 from tensorflow.keras.models import load_model
 
-from model.dataset import load_dataset
+from dataset import load_dataset
 
 
 CONFIG_FILE = "config.json"

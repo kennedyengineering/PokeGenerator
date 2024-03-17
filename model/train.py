@@ -7,8 +7,8 @@ import numpy as np
 from pathlib import Path
 from datetime import datetime
 
-from model.autoencoder import build_model
-from model.dataset import load_dataset
+from autoencoder import build_model
+from dataset import load_dataset
 
 
 CONFIG_FILE = "config.json"
