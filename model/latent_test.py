@@ -34,12 +34,12 @@ def display_images(images, titles=None, cols=5, figsize=(20, 10)):
     plt.show()
 
 def main():
-    with open("/Users/lucky/GitHub/PokeGenerator/model/training_config.json", "r") as f:
+    with open("training_config.json", "r") as f:
         config = json.load(f)
     images = load_dataset(config)  
 
     # TODO: Scrap from config file
-    autoencoder = tf.keras.models.load_model("/Users/lucky/GitHub/PokeGenerator/model/model_2024-03-16-17:16:18.keras")
+    autoencoder = tf.keras.models.load_model("model_2024-03-16-17:16:18.keras")
     predictions = autoencoder.predict(images)
     autoencoder.summary()
 
@@ -56,7 +56,7 @@ def main():
     # display_images(rgb_predictions[:10]) 
 
     input_dim = 8192
-    num_layers = 3    # Number of hidden layers
+    num_layers = 32    # Number of hidden layers
     num_hidden = 10000  # Number of neurons in each hidden layer
     T = 1000
     latent_model = build_reverse_process_mlp_model(input_dim, num_layers, num_hidden, T)
