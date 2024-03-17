@@ -1,11 +1,14 @@
 # PokeGenerator Project
 # Contains autoencoder model
-
+import tensorflow as tf
 from tensorflow.keras.layers import (
     Input,
     Conv2D,
     MaxPooling2D,
     UpSampling2D,
+    Conv2DTranspose,
+    Flatten,
+    Reshape,
 )
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.optimizers import Adam
@@ -18,13 +21,18 @@ def build_encoder(input_shape=(128, 128, 3), kernel_shape=(5, 5)):
         [
             Input(shape=input_shape),
             Conv2D(16, kernel_shape, activation="swish", padding="same"),
+            Conv2D(16, kernel_shape, activation="swish", padding="same"),
             MaxPooling2D((2, 2), padding="same"),
+            Conv2D(32, kernel_shape, activation="swish", padding="same"),
             Conv2D(32, kernel_shape, activation="swish", padding="same"),
             MaxPooling2D((2, 2), padding="same"),
             Conv2D(64, kernel_shape, activation="swish", padding="same"),
+            Conv2D(64, kernel_shape, activation="swish", padding="same"),
             MaxPooling2D((2, 2), padding="same"),
+            Conv2D(128, kernel_shape, activation="swish", padding="same"),
             Conv2D(128, kernel_shape, activation="tanh", padding="same"),
             MaxPooling2D((2, 2), padding="same"),
+            Flatten(),
         ],
         name="encoder",
     )
@@ -36,12 +44,17 @@ def build_decoder(encoder, kernel_shape=(5, 5)):
     return Sequential(
         [
             Input(shape=encoder.layers[-1].output_shape[1:]),
+            Reshape(target_shape=encoder.layers[-2].output_shape[1:]),
+            Conv2D(128, kernel_shape, activation="swish", padding="same"),
             Conv2D(128, kernel_shape, activation="swish", padding="same"),
             UpSampling2D((2, 2)),
             Conv2D(64, kernel_shape, activation="swish", padding="same"),
+            Conv2D(64, kernel_shape, activation="swish", padding="same"),
             UpSampling2D((2, 2)),
             Conv2D(32, kernel_shape, activation="swish", padding="same"),
+            Conv2D(32, kernel_shape, activation="swish", padding="same"),
             UpSampling2D((2, 2)),
+            Conv2D(16, kernel_shape, activation="swish", padding="same"),
             Conv2D(16, kernel_shape, activation="swish", padding="same"),
             UpSampling2D((2, 2)),
             Conv2D(3, kernel_shape, activation="sigmoid", padding="same"),
@@ -63,7 +76,7 @@ def build_model():
     encoder = build_encoder()
     decoder = build_decoder(encoder)
     autoencoder = build_autoencoder(encoder, decoder)
-    autoencoder.compile(Adam(3e-4), loss="binary_crossentropy")
+    autoencoder.compile(Adam(3e-5), loss="binary_crossentropy")
     return autoencoder, encoder, decoder
 
 
