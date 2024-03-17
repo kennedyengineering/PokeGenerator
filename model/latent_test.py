@@ -1,3 +1,4 @@
+import datetime
 import json
 from latent_diffusion import (
     build_reverse_process_mlp_model, 
@@ -9,6 +10,7 @@ import tensorflow as tf
 from train import load_dataset
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input
+import cv2
 # import matplotlib.pyplot as plt
 
 # def display_images(images, titles=None, cols=5, figsize=(20, 10)):
@@ -56,8 +58,8 @@ def main():
     # display_images(rgb_predictions[:10]) 
 
     input_dim = 8192
-    num_layers = 3    # Number of hidden layers
-    num_hidden = 128  # Number of neurons in each hidden layer
+    num_layers = 16    # Number of hidden layers
+    num_hidden = 9000  # Number of neurons in each hidden layer
     T = 1000
     latent_model = build_reverse_process_mlp_model(input_dim, num_layers, num_hidden, T)
     latent_model.summary()
@@ -72,14 +74,22 @@ def main():
     latent_vectors = encoder.predict(images)
     latent_model = training(
         latent_vectors, batch_size, T, 
-        alphas_cumprod, latent_model
+        alphas_cumprod, latent_model, epochs=500
     )
+
+    # Save Model
+    latent_model.save("checkpoints/latent_model_" + datetime.now().strftime("%Y-%m-%d-%H:%M:%S%z") + ".keras")
 
     # Sample latent vectors
     sampled_latent_vectors = sample(latent_model, shape=latent_vectors.shape)
 
     # Decode sampled latent vectors into images
-    decoded_images = autoencoder.decoder.predict(sampled_latent_vectors)
+    output = autoencoder.decoder.predict(sampled_latent_vectors)
+
+    for i in range(len(output)):
+        cv2.imshow("yo", cv2.cvtColor(output[i], cv2.COLOR_RGB2BGR))
+        if cv2.waitKey(-1) & 0xFF == ord("q"):
+            break
 
     # # Visualize the latent space
     # plt.figure(figsize=(10, 5))
