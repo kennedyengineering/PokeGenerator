@@ -9,29 +9,29 @@ import tensorflow as tf
 from train import load_dataset
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
-def display_images(images, titles=None, cols=5, figsize=(20, 10)):
-    """
-    Display a list of images in a grid.
+# def display_images(images, titles=None, cols=5, figsize=(20, 10)):
+#     """
+#     Display a list of images in a grid.
 
-    Args:
-        images: A list or array of images to display.
-        titles: Optional list of titles for each image.
-        cols: Number of columns in the image grid.
-        figsize: Tuple indicating the size of the figure.
-    """
-    n_images = len(images)
-    rows = (n_images + cols - 1) // cols
-    plt.figure(figsize=figsize)
-    for i, image in enumerate(images):
-        plt.subplot(rows, cols, i + 1)
-        plt.imshow(image, cmap='gray')  # Adjust as needed
-        if titles is not None:
-            plt.title(titles[i])
-        plt.axis('off')
-    plt.tight_layout()
-    plt.show()
+#     Args:
+#         images: A list or array of images to display.
+#         titles: Optional list of titles for each image.
+#         cols: Number of columns in the image grid.
+#         figsize: Tuple indicating the size of the figure.
+#     """
+#     n_images = len(images)
+#     rows = (n_images + cols - 1) // cols
+#     plt.figure(figsize=figsize)
+#     for i, image in enumerate(images):
+#         plt.subplot(rows, cols, i + 1)
+#         plt.imshow(image, cmap='gray')  # Adjust as needed
+#         if titles is not None:
+#             plt.title(titles[i])
+#         plt.axis('off')
+#     plt.tight_layout()
+#     plt.show()
 
 def main():
     with open("training_config.json", "r") as f:
@@ -81,13 +81,13 @@ def main():
     # Decode sampled latent vectors into images
     decoded_images = autoencoder.decoder.predict(sampled_latent_vectors)
 
-    # Visualize the latent space
-    plt.figure(figsize=(10, 5))
-    plt.scatter(latent_vectors[:, 0], latent_vectors[:, 1], alpha=0.5, label="Training Latent Vectors")
-    plt.scatter(sampled_latent_vectors[:, 0], sampled_latent_vectors[:, 1], alpha=0.5, label="Sampled Latent Vectors")
-    plt.legend()
-    plt.title("Latent Space Visualization")
-    plt.show()
+    # # Visualize the latent space
+    # plt.figure(figsize=(10, 5))
+    # plt.scatter(latent_vectors[:, 0], latent_vectors[:, 1], alpha=0.5, label="Training Latent Vectors")
+    # plt.scatter(sampled_latent_vectors[:, 0], sampled_latent_vectors[:, 1], alpha=0.5, label="Sampled Latent Vectors")
+    # plt.legend()
+    # plt.title("Latent Space Visualization")
+    # plt.show()
 
 if __name__ == "__main__":
     main()
