@@ -51,7 +51,7 @@ def training(latent_vectors, batch_size, T, alphas_cumprod, model, epochs=100):
     for epoch in range(epochs):
         total_loss = 0
     
-        pbar = tqdm(total=len(train_dataset))
+        # pbar = tqdm(total=len(train_dataset))
         for step, x_batch_train in enumerate(train_dataset):
             # t = np.random.randint(T,size=len(x_batch_train))
         
@@ -79,8 +79,8 @@ def training(latent_vectors, batch_size, T, alphas_cumprod, model, epochs=100):
             grads = tape.gradient(loss_value, model.trainable_weights)
             opt.apply_gradients(zip(grads, model.trainable_weights))
     
-            pbar.update(1)
-        pbar.close()
+        #     pbar.update(1)
+        # pbar.close()
     
         total_loss /= len(train_dataset)
         print(f'loss at epoch {epoch}: {total_loss}')
