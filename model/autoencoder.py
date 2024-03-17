@@ -52,7 +52,7 @@ def build_decoder(encoder, kernel_shape=(5, 5)):
 
 def build_autoencoder(encoder, decoder):
     """Build the autoencoder architecture"""
-    inputs = Input(encoder.layers[0].input_shape, name="autoencoder_input")
+    inputs = Input(encoder.layers[0].input_shape[1:], name="autoencoder_input")
     embedding = encoder(inputs)
     reconstruction = decoder(embedding)
     return Model(inputs=inputs, outputs=reconstruction, name="autoencoder")
