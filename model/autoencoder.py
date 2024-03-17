@@ -1,38 +1,50 @@
 # PokeGenerator Project
 # Contains autoencoder model
 
-from tensorflow.keras.layers import Input, Flatten, Dense, Reshape
+from tensorflow.keras.layers import (
+    Input,
+    Conv2D,
+    MaxPooling2D,
+    UpSampling2D,
+)
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.optimizers import Adam
 
 
-def build_encoder(latent_dim):
+def build_encoder(input_shape=(128, 128, 3), kernel_shape=(5, 5)):
     """Build the encoder architecture"""
+
     return Sequential(
         [
-            Input(shape=(100, 100, 3), name="encoder_input"),
-            Flatten(),
-            Dense(256, activation="relu", name="encoder_hidden_1"),
-            Dense(128, activation="relu", name="encoder_hidden_2"),
-            Dense(64, activation="relu", name="encoder_hidden_3"),
-            Dense(32, activation="relu", name="encoder_hidden_4"),
-            Dense(latent_dim, activation="tanh", name="encoder_embedding"),
+            Input(shape=input_shape),
+            Conv2D(16, kernel_shape, activation="swish", padding="same"),
+            MaxPooling2D((2, 2), padding="same"),
+            Conv2D(32, kernel_shape, activation="swish", padding="same"),
+            MaxPooling2D((2, 2), padding="same"),
+            Conv2D(64, kernel_shape, activation="swish", padding="same"),
+            MaxPooling2D((2, 2), padding="same"),
+            Conv2D(128, kernel_shape, activation="tanh", padding="same"),
+            MaxPooling2D((2, 2), padding="same"),
         ],
         name="encoder",
     )
 
 
-def build_decoder(latent_dim):
+def build_decoder(encoder, kernel_shape=(5, 5)):
     """Bulid the decoder architecture"""
+
     return Sequential(
         [
-            Input(latent_dim, name="decoder_input"),
-            Dense(32, activation="relu", name="decoder_hidden_1"),
-            Dense(64, activation="relu", name="decoder_hidden_2"),
-            Dense(128, activation="relu", name="decoder_hidden_3"),
-            Dense(256, activation="relu", name="decoder_hidden_4"),
-            Dense(100 * 100 * 3, activation="linear", name="decoder_output"),
-            Reshape((100, 100, 3)),
+            Input(shape=encoder.layers[-1].output_shape[1:]),
+            Conv2D(128, kernel_shape, activation="swish", padding="same"),
+            UpSampling2D((2, 2)),
+            Conv2D(64, kernel_shape, activation="swish", padding="same"),
+            UpSampling2D((2, 2)),
+            Conv2D(32, kernel_shape, activation="swish", padding="same"),
+            UpSampling2D((2, 2)),
+            Conv2D(16, kernel_shape, activation="swish", padding="same"),
+            UpSampling2D((2, 2)),
+            Conv2D(3, kernel_shape, activation="sigmoid", padding="same"),
         ],
         name="decoder",
     )
@@ -40,18 +52,18 @@ def build_decoder(latent_dim):
 
 def build_autoencoder(encoder, decoder):
     """Build the autoencoder architecture"""
-    inputs = Input((100, 100, 3), name="autoencoder_input")
+    inputs = Input(encoder.layers[0].input_shape, name="autoencoder_input")
     embedding = encoder(inputs)
     reconstruction = decoder(embedding)
     return Model(inputs=inputs, outputs=reconstruction, name="autoencoder")
 
 
-def build_model(latent_dim=2):
+def build_model():
     """Return a trainable model and heads"""
-    encoder = build_encoder(latent_dim)
-    decoder = build_decoder(latent_dim)
+    encoder = build_encoder()
+    decoder = build_decoder(encoder)
     autoencoder = build_autoencoder(encoder, decoder)
-    autoencoder.compile(Adam(3e-4), loss="mean_squared_error")
+    autoencoder.compile(Adam(3e-4), loss="binary_crossentropy")
     return autoencoder, encoder, decoder
 
 
