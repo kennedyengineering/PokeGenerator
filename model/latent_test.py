@@ -58,8 +58,8 @@ def main():
     # display_images(rgb_predictions[:10]) 
 
     input_dim = 8192
-    num_layers = 16    # Number of hidden layers
-    num_hidden = 9000  # Number of neurons in each hidden layer
+    num_layers = 8    # Number of hidden layers
+    num_hidden = 6000  # Number of neurons in each hidden layer
     T = 1000
     latent_model = build_reverse_process_mlp_model(input_dim, num_layers, num_hidden, T)
     latent_model.summary()
@@ -74,7 +74,7 @@ def main():
     latent_vectors = encoder.predict(images)
     latent_model = training(
         latent_vectors, batch_size, T, 
-        alphas_cumprod, latent_model, epochs=5
+        alphas_cumprod, latent_model, epochs=400
     )
 
     # Save Model
