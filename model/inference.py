@@ -7,11 +7,12 @@ from pathlib import Path
 from datetime import datetime
 import imageio.v3 as iio
 import numpy as np
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+import cv2
+from tensorflow.keras.models import load_model
 
 # TODO: Add option to select model to train
 # from autoencoder import build_model
-from conv_autoencoder4 import build_model
+from conv_autoencoder import build_model
 
 
 CONFIG_FILE = "training_config.json"
@@ -59,6 +60,11 @@ def main():
         type=argparse.FileType("r"),
         default=CONFIG_FILE,
     )
+    parser.add_argument(
+        "--model_path",
+        help="Path to .keras Checkpoint",
+        type=str,
+    )
     args = parser.parse_args()
 
     # Load JSON Data
@@ -71,40 +77,16 @@ def main():
     # images = (images.astype(np.float32) / 127.5) - 1.0
     images = images.astype(np.float32) / 255.0
 
-    # Build and train model
-    model, encoder, decoder = build_model()
+    # Build and inference model
+    model = load_model(args.model_path)
+    model.summary()
 
-    # print(encoder.summary())
-    # print(decoder.summary())
-    # exit()
+    output = model.predict(images)
 
-    early_stopping = EarlyStopping(
-        monitor="val_loss", patience=10, verbose=0, mode="min"
-    )
-    # mcp_save = ModelCheckpoint('.mdl_wts.hdf5', save_best_only=True, monitor='val_loss', mode='min')
-    reduce_lr_loss = ReduceLROnPlateau(
-        monitor="val_loss", factor=0.2, patience=7, verbose=1, epsilon=1e-4, mode="min"
-    )
-
-    history = model.fit(
-        images,
-        images,
-        batch_size=config["batch_size"],
-        epochs=config["epochs"],
-        validation_split=config["validation_split"],
-        shuffle=True,
-        callbacks=[early_stopping, reduce_lr_loss],
-    )
-
-    # Save the model
-    # TODO: Add checkpointing, save models every X epochs to an directory corresponding to a training run
-    # TODO: Use callbacks to save model checkpoints, and produce example inference image (to show progression)
-    checkpoint_directory = Path(config["checkpoint_directory"])
-    checkpoint_directory.mkdir(exist_ok=True)
-    model.save(
-        checkpoint_directory
-        / ("model_" + datetime.now().strftime("%Y-%m-%d-%H:%M:%S%z") + ".keras")
-    )
+    for i in range(len(output)):
+        cv2.imshow("yo", cv2.cvtColor(output[i], cv2.COLOR_RGB2BGR))
+        if cv2.waitKey(-1) & 0xFF == ord("q"):
+            break
 
 
 if __name__ == "__main__":

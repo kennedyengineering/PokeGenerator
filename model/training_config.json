@@ -1,8 +1,8 @@
 {
   "batch_size": 32,
-  "checkpoint_directory": "checkpoints",
-  "dataset_cache": "./poke128_cache.npy",
+  "checkpoint_directory": "/datasets/poke/checkpoints/paul/",
+  "dataset_cache": "/datasets/cached_pokes/poke128_cache.npy",
   "dataset_directory": "/datasets/poke128",
-  "epochs": 500,
+  "epochs": 300,
   "validation_split": 0.1
 }
