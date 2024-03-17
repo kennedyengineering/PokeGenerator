@@ -3,6 +3,6 @@
   "checkpoint_directory": "checkpoints",
   "dataset_cache": "/datasets/Pokemon_Sprites/dataset_128_cache.npy",
   "dataset_directory": "/datasets/Pokemon_Sprites/dataset_128",
-  "epochs": 5,
+  "epochs": 500,
   "validation_split": 0.1
 }
