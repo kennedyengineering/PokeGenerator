@@ -41,14 +41,13 @@ def build_reverse_process_mlp_model(input_dim, num_layers, num_hidden, T):
     model = keras.Model(inputs=[latent_input, timestep_input], outputs=output)
     return model
 
-def training(latent_vectors, batch_size, T, alphas_cumprod, model):
+def training(latent_vectors, batch_size, T, alphas_cumprod, model, epochs=100):
     train_dataset = tf.data.Dataset.from_tensor_slices(latent_vectors)
     train_dataset = train_dataset.shuffle(buffer_size=1024).batch(batch_size)
 
-    opt = keras.optimizers.Adam(3e-4)
+    opt = keras.optimizers.Adam(9e-4)
     loss_fn = keras.losses.MeanSquaredError()
 
-    epochs = 100
     for epoch in range(epochs):
         total_loss = 0
     
@@ -80,7 +79,7 @@ def training(latent_vectors, batch_size, T, alphas_cumprod, model):
             grads = tape.gradient(loss_value, model.trainable_weights)
             opt.apply_gradients(zip(grads, model.trainable_weights))
     
-        pbar.update(1)
+            pbar.update(1)
         pbar.close()
     
         total_loss /= len(train_dataset)
