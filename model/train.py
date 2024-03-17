@@ -43,6 +43,10 @@ def load_dataset(config):
 
         # Update cache
         images.dump(config["dataset_cache"])
+    
+    # Preprocess the dataset (Normalize to [-1, 1] range)   # FIXME: is [0 1 range better?] -- is necessary for binary_crossentropy loss
+    # images = (images.astype(np.float32) / 127.5) - 1.0
+    images = images.astype(np.float32) / 255.0
 
     return images
 
@@ -66,10 +70,6 @@ def main():
     # Load the dataset
     images = load_dataset(config)
 
-    # Preprocess the dataset (Normalize to [-1, 1] range)   # FIXME: is [0 1 range better?] -- is necessary for binary_crossentropy loss
-    # images = (images.astype(np.float32) / 127.5) - 1.0
-    images = images.astype(np.float32) / 255.0
-
     # Build and train model
     model, encoder, decoder = build_model()
 
@@ -90,6 +90,14 @@ def main():
     model.save(
         checkpoint_directory
         / ("model_" + datetime.now().strftime("%Y-%m-%d-%H:%M:%S%z") + ".keras")
+    )
+    encoder.save(
+        checkpoint_directory
+        / ("encoder_" + datetime.now().strftime("%Y-%m-%d-%H:%M:%S%z") + ".keras")
+    )
+    decoder.save(
+        checkpoint_directory
+        / ("decoder_" + datetime.now().strftime("%Y-%m-%d-%H:%M:%S%z") + ".keras")
     )
 
 
