@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import json
 from latent_diffusion import (
     build_reverse_process_mlp_model, 
@@ -74,22 +74,22 @@ def main():
     latent_vectors = encoder.predict(images)
     latent_model = training(
         latent_vectors, batch_size, T, 
-        alphas_cumprod, latent_model, epochs=200
+        alphas_cumprod, latent_model, epochs=5
     )
 
     # Save Model
     latent_model.save("checkpoints/latent_model_" + datetime.now().strftime("%Y-%m-%d-%H:%M:%S%z") + ".keras")
 
-    # Sample latent vectors
-    sampled_latent_vectors = sample(latent_model, shape=latent_vectors.shape)
+    # # Sample latent vectors
+    # sampled_latent_vectors = sample(latent_model, shape=latent_vectors.shape)
 
-    # Decode sampled latent vectors into images
-    output = autoencoder.decoder.predict(sampled_latent_vectors)
+    # # Decode sampled latent vectors into images
+    # output = autoencoder.decoder.predict(sampled_latent_vectors)
 
-    for i in range(len(output)):
-        cv2.imshow("yo", cv2.cvtColor(output[i], cv2.COLOR_RGB2BGR))
-        if cv2.waitKey(-1) & 0xFF == ord("q"):
-            break
+    # for i in range(len(output)):
+    #     cv2.imshow("yo", cv2.cvtColor(output[i], cv2.COLOR_RGB2BGR))
+    #     if cv2.waitKey(-1) & 0xFF == ord("q"):
+    #         break
 
     # # Visualize the latent space
     # plt.figure(figsize=(10, 5))
