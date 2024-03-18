@@ -17,13 +17,11 @@ def build_encoder(input_shape=(128, 128, 3), kernel_shape=(5, 5), latent_dim=256
     x = Activation(swish)(x)
 
     x = Conv2D(64, kernel_shape, padding='same')(x)
-    x = BatchNormalization()(x)  # Added batch normalization
     x = Activation(swish)(x)
     x = Conv2D(64, kernel_shape, strides=(2, 2), padding='same')(x)
     x = Activation(swish)(x)
 
     x = Conv2D(128, kernel_shape, padding='same')(x)
-    x = BatchNormalization()(x)  # Added batch normalization
     x = Activation(swish)(x)
     x = Conv2D(128, kernel_shape, strides=(2, 2), padding='same')(x)
     x = Activation(swish)(x)
@@ -31,7 +29,6 @@ def build_encoder(input_shape=(128, 128, 3), kernel_shape=(5, 5), latent_dim=256
     x = Flatten()(x)
     x = Dense(512)(x)  # Added dense layer before latent space
     x = Activation(swish)(x)
-    x = Dropout(0.5)(x)  # Added dropout for regularization
 
     encoder_mean = Dense(latent_dim, name='mean')(x)
     encoder_log_var = Dense(latent_dim, name='log_var')(x)
@@ -44,26 +41,21 @@ def build_decoder(encoder, kernel_shape=(5,5), latent_dim=256):
     # Assume the same dense architecture as the encoder for symmetry
     hidden_units = encoder.layers[-6].output_shape[1]
     x = Dense(hidden_units)(latent_inputs)
-    x = BatchNormalization()(x)  # Consistency with encoder
     x = Activation(swish)(x)  # Use swish activation function
-    x = Dropout(0.5)(x)  # Optional: if overfitting is observed
 
     hidden_shape = encoder.layers[-7].output_shape[1:]
     x = Reshape(hidden_shape)(x)
 
     x = UpSampling2D((2, 2))(x)
     x = Conv2DTranspose(128, kernel_shape, padding='same')(x)
-    x = BatchNormalization()(x)  
     x = Activation(swish)(x)
 
     x = UpSampling2D((2, 2))(x)
     x = Conv2DTranspose(64, kernel_shape, padding='same')(x)
-    x = BatchNormalization()(x)  
     x = Activation(swish)(x)
 
     x = UpSampling2D((2, 2))(x)
     x = Conv2DTranspose(32, kernel_shape, padding='same')(x)
-    x = BatchNormalization()(x)  
     x = Activation(swish)(x)
 
     decoder_outputs = Conv2DTranspose(3, kernel_shape, activation='sigmoid', padding='same', name='decoder')(x)
