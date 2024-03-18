@@ -7,6 +7,7 @@ from pathlib import Path
 from datetime import datetime
 import imageio.v3 as iio
 import numpy as np
+import tensorflow as tf
 
 # TODO: Add option to select model to train
 # from autoencoder import build_model
@@ -74,6 +75,8 @@ def main():
     # Build and train model
     model, encoder, decoder = build_model()
 
+    # Early stopping
+
     history = model.fit(
         images,
         images,
@@ -81,6 +84,9 @@ def main():
         epochs=config["epochs"],
         validation_split=config["validation_split"],  # FIXME: Does autoencoder need validation data split?
         shuffle=True,
+        callbacks=[
+            tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True),
+        ],
     )
 
     # Save the model
