@@ -82,7 +82,7 @@ def main():
         images,
         batch_size=config["batch_size"],
         epochs=config["epochs"],
-        validation_split=config["validation_split"],  # FIXME: Does autoencoder need validation data split?
+        validation_split=config["validation_split"], 
         shuffle=True,
         callbacks=[
             tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True, verbose=1),
