@@ -6,6 +6,8 @@ CSC 587 Final Project, Winter 2024, Jonathan Ventura
 - Paul Jarski ()
 - Briana Kuo ()
 
+![](./picablu.png)
+
 ## Installation
 ```
 ./setup.sh

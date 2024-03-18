@@ -1,8 +1,0 @@
-{
-  "batch_size": 32,
-  "checkpoint_directory": "checkpoints",
-  "dataset_cache": "dataset_cache.npy",
-  "dataset_directory": "../dataset/dataset",
-  "epochs": 5,
-  "validation_split": 0.1
-}

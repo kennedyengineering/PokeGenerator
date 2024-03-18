@@ -1,0 +1,13 @@
+{
+  "dataset": {
+    "dataset_cache": "/datasets/Pokemon_Sprites/dataset_128_cache.npy",
+    "dataset_cache_enable": true,
+    "dataset_directory": "/datasets/Pokemon_Sprites/dataset_128"
+  },
+  "inference": {},
+  "training": {
+    "batch_size": 32,
+    "checkpoint_directory": "checkpoints",
+    "epochs": 500
+  }
+}

@@ -1,6 +1,6 @@
 {
   "apply_blacklist": true,
-  "output_directory": "dataset",
-  "source_directory": "../../final_project_shared/sprites",
-  "sprite_size": 100
+  "output_directory": "/datasets/Pokemon_Sprites/dataset_128",
+  "source_directory": "/datasets/Pokemon_Sprites/sprites",
+  "sprite_size": 128
 }
