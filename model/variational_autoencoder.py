@@ -70,7 +70,7 @@ def build_autoencoder(encoder, decoder, input_shape=(128, 128, 3), latent_dim=25
 
     return vae
 
-def build_model(latent_dim):
+def build_model(latent_dim=256):
     encoder = build_encoder(latent_dim=latent_dim)
     encoder.summary()
     decoder = build_decoder(encoder=encoder, latent_dim=latent_dim)
@@ -82,4 +82,4 @@ def build_model(latent_dim):
     autoencoder.compile(opt)
     return autoencoder, encoder, decoder
 
-vae, _, _ = build_model(latent_dim=256)
+# vae, _, _ = build_model(latent_dim=256)

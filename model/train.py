@@ -10,7 +10,8 @@ import numpy as np
 
 # TODO: Add option to select model to train
 # from autoencoder import build_model
-from conv_autoencoder import build_model
+#from conv_autoencoder import build_model
+from variational_autoencoder import build_model
 
 
 CONFIG_FILE = "training_config.json"
@@ -78,7 +79,7 @@ def main():
         images,
         batch_size=config["batch_size"],
         epochs=config["epochs"],
-        # validation_split=config["validation_split"],  # FIXME: Does autoencoder need validation data split?
+        validation_split=config["validation_split"],  # FIXME: Does autoencoder need validation data split?
         shuffle=True,
     )
 
@@ -91,15 +92,6 @@ def main():
         checkpoint_directory
         / ("model_" + datetime.now().strftime("%Y-%m-%d-%H:%M:%S%z") + ".keras")
     )
-    encoder.save(
-        checkpoint_directory
-        / ("encoder_" + datetime.now().strftime("%Y-%m-%d-%H:%M:%S%z") + ".keras")
-    )
-    decoder.save(
-        checkpoint_directory
-        / ("decoder_" + datetime.now().strftime("%Y-%m-%d-%H:%M:%S%z") + ".keras")
-    )
-
 
 if __name__ == "__main__":
     main()
