@@ -72,8 +72,8 @@ def main():
     # Load the dataset
     images = load_dataset(config)
 
-    # Build and train model
-    model, encoder, decoder = build_model()
+    # Build and train model, TODO: Add latent_dim to config file
+    model, encoder, decoder = build_model(latent_dim=1024)
 
     # Early stopping
 

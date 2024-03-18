@@ -7,7 +7,7 @@ from tensorflow.keras.models import Model
 from tensorflow.keras import backend as K
 from tensorflow.keras.losses import mse
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.activations import swish
+from tensorflow.keras.activations import swish, tanh
 
 def build_encoder(input_shape=(128, 128, 3), kernel_shape=(5, 5), latent_dim=256):
     encoder_inputs = Input(shape=input_shape, name='encoder_input')
@@ -26,9 +26,14 @@ def build_encoder(input_shape=(128, 128, 3), kernel_shape=(5, 5), latent_dim=256
     x = Conv2D(128, kernel_shape, strides=(2, 2), padding='same')(x)
     x = Activation(swish)(x)
 
-    x = Flatten()(x)
-    x = Dense(512)(x)  # Added dense layer before latent space
+    x = Conv2D(64, kernel_shape, padding='same')(x)
     x = Activation(swish)(x)
+    x = Conv2D(64, kernel_shape, strides=(2, 2), padding='same')(x)
+    x = Activation(swish)(x)
+
+    x = Flatten()(x)
+    x = Dense(x.shape[1]//2)(x)  # Added dense layer before latent space
+    x = Activation(tanh)(x)
 
     encoder_mean = Dense(latent_dim, name='mean')(x)
     encoder_log_var = Dense(latent_dim, name='log_var')(x)
@@ -39,12 +44,16 @@ def build_decoder(encoder, kernel_shape=(5,5), latent_dim=256):
     latent_inputs = Input(shape=(latent_dim,), name='decoder_input')
 
     # Assume the same dense architecture as the encoder for symmetry
-    hidden_units = encoder.layers[-6].output_shape[1]
+    hidden_units = encoder.layers[-5].output_shape[1]
     x = Dense(hidden_units)(latent_inputs)
     x = Activation(swish)(x)  # Use swish activation function
 
-    hidden_shape = encoder.layers[-7].output_shape[1:]
+    hidden_shape = encoder.layers[-6].output_shape[1:]
     x = Reshape(hidden_shape)(x)
+
+    x = UpSampling2D((2, 2))(x)
+    x = Conv2DTranspose(256, kernel_shape, padding='same')(x)
+    x = Activation(swish)(x)
 
     x = UpSampling2D((2, 2))(x)
     x = Conv2DTranspose(128, kernel_shape, padding='same')(x)
@@ -103,7 +112,7 @@ def build_model(latent_dim=256):
     autoencoder.compile(opt)
     return autoencoder, encoder, decoder
 
-# vae, encoder, decoder = build_model(latent_dim=256)
+# vae, encoder, decoder = build_model(latent_dim=1024)
 
 # vae.summary()
 # encoder.summary()
