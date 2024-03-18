@@ -1,66 +1,70 @@
 from tensorflow.keras.layers import (
     Conv2D, MaxPooling2D, Flatten, Dense, Input, LeakyReLU,
-    Conv2DTranspose, Reshape, UpSampling2D, Lambda,
+    Conv2DTranspose, Reshape, UpSampling2D, Lambda, Activation,
+    BatchNormalization, Dropout
 )
 from tensorflow.keras.models import Model
 from tensorflow.keras import backend as K
 from tensorflow.keras.losses import mse
 from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.activations import swish
 
-def build_encoder(input_shape=(128,128,3), kernel_shape=(3,3), latent_dim=256):
+def build_encoder(input_shape=(128, 128, 3), kernel_shape=(5, 5), latent_dim=256):
     encoder_inputs = Input(shape=input_shape, name='encoder_input')
     x = Conv2D(32, kernel_shape, padding='same')(encoder_inputs)
-    x = LeakyReLU()(x)
-    x = Conv2D(32, kernel_shape, padding='same')(encoder_inputs)
-    x = LeakyReLU()(x)
-    x = MaxPooling2D((2, 2), padding='same')(x)
+    x = Activation(swish)(x)
+    x = Conv2D(32, kernel_shape, strides=(2, 2), padding='same')(x)  
+    x = Activation(swish)(x)
 
     x = Conv2D(64, kernel_shape, padding='same')(x)
-    x = LeakyReLU()(x)
-    x = Conv2D(64, kernel_shape, padding='same')(x)
-    x = LeakyReLU()(x)
-    x = MaxPooling2D((2, 2), padding='same')(x)
+    x = BatchNormalization()(x)  # Added batch normalization
+    x = Activation(swish)(x)
+    x = Conv2D(64, kernel_shape, strides=(2, 2), padding='same')(x)
+    x = Activation(swish)(x)
 
     x = Conv2D(128, kernel_shape, padding='same')(x)
-    x = LeakyReLU()(x)
-    x = Conv2D(128, kernel_shape, padding='same')(x)
-    x = LeakyReLU()(x)
-    x = MaxPooling2D((2, 2), padding='same')(x)
+    x = BatchNormalization()(x)  # Added batch normalization
+    x = Activation(swish)(x)
+    x = Conv2D(128, kernel_shape, strides=(2, 2), padding='same')(x)
+    x = Activation(swish)(x)
 
     x = Flatten()(x)
+    x = Dense(512)(x)  # Added dense layer before latent space
+    x = Activation(swish)(x)
+    x = Dropout(0.5)(x)  # Added dropout for regularization
 
-    x = Dense(latent_dim, activation='relu')(x)
     encoder_mean = Dense(latent_dim, name='mean')(x)
     encoder_log_var = Dense(latent_dim, name='log_var')(x)
 
-    return Model(inputs=encoder_inputs,outputs=[encoder_mean,encoder_log_var], name='encoder')
+    return Model(inputs=encoder_inputs, outputs=[encoder_mean, encoder_log_var], name='encoder')
 
-def build_decoder(encoder, kernel_shape=(3,3), latent_dim=256):
+def build_decoder(encoder, kernel_shape=(5,5), latent_dim=256):
     latent_inputs = Input(shape=(latent_dim,), name='decoder_input')
 
-    hidden_units = encoder.layers[-4].output_shape[1]
-    x = Dense(hidden_units, activation='relu')(latent_inputs)
+    # Assume the same dense architecture as the encoder for symmetry
+    hidden_units = encoder.layers[-6].output_shape[1]
+    x = Dense(hidden_units)(latent_inputs)
+    x = BatchNormalization()(x)  # Consistency with encoder
+    x = Activation(swish)(x)  # Use swish activation function
+    x = Dropout(0.5)(x)  # Optional: if overfitting is observed
 
-    hidden_shape = encoder.layers[-5].output_shape[1:]
+    hidden_shape = encoder.layers[-7].output_shape[1:]
     x = Reshape(hidden_shape)(x)
 
     x = UpSampling2D((2, 2))(x)
     x = Conv2DTranspose(128, kernel_shape, padding='same')(x)
-    x = LeakyReLU()(x)
-    x = Conv2DTranspose(128, kernel_shape, padding='same')(x)
-    x = LeakyReLU()(x)
+    x = BatchNormalization()(x)  
+    x = Activation(swish)(x)
 
     x = UpSampling2D((2, 2))(x)
     x = Conv2DTranspose(64, kernel_shape, padding='same')(x)
-    x = LeakyReLU()(x)
-    x = Conv2DTranspose(64, kernel_shape, padding='same')(x)
-    x = LeakyReLU()(x)
+    x = BatchNormalization()(x)  
+    x = Activation(swish)(x)
 
     x = UpSampling2D((2, 2))(x)
     x = Conv2DTranspose(32, kernel_shape, padding='same')(x)
-    x = LeakyReLU()(x)
-    x = Conv2DTranspose(32, kernel_shape, padding='same')(x)
-    x = LeakyReLU()(x)
+    x = BatchNormalization()(x)  
+    x = Activation(swish)(x)
 
     decoder_outputs = Conv2DTranspose(3, kernel_shape, activation='sigmoid', padding='same', name='decoder')(x)
     return Model(inputs=latent_inputs, outputs=decoder_outputs, name='decoder')
@@ -107,7 +111,7 @@ def build_model(latent_dim=256):
     autoencoder.compile(opt)
     return autoencoder, encoder, decoder
 
-vae, encoder, decoder = build_model(latent_dim=256)
+# vae, encoder, decoder = build_model(latent_dim=256)
 
 # vae.summary()
 # encoder.summary()
