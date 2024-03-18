@@ -7,33 +7,61 @@ from tensorflow.keras import backend as K
 from tensorflow.keras.losses import mse
 from tensorflow.keras.optimizers import Adam
 
-def build_encoder(input_shape=(128,128,3), kernel_shape=(3,3), latent_dim=8192):
+def build_encoder(input_shape=(128,128,3), kernel_shape=(3,3), latent_dim=256):
     encoder_inputs = Input(shape=input_shape, name='encoder_input')
-    x = Conv2D(16, kernel_shape, activation='relu', padding='same')(encoder_inputs)
+    x = Conv2D(32, kernel_shape, padding='same')(encoder_inputs)
+    x = LeakyReLU()(x)
+    x = Conv2D(32, kernel_shape, padding='same')(encoder_inputs)
+    x = LeakyReLU()(x)
     x = MaxPooling2D((2, 2), padding='same')(x)
-    x = Conv2D(64, kernel_shape, activation='relu', padding='same')(x)
+
+    x = Conv2D(64, kernel_shape, padding='same')(x)
+    x = LeakyReLU()(x)
+    x = Conv2D(64, kernel_shape, padding='same')(x)
+    x = LeakyReLU()(x)
     x = MaxPooling2D((2, 2), padding='same')(x)
-    x = Conv2D(128, kernel_shape, activation='relu', padding='same')(x)
+
+    x = Conv2D(128, kernel_shape, padding='same')(x)
+    x = LeakyReLU()(x)
+    x = Conv2D(128, kernel_shape, padding='same')(x)
+    x = LeakyReLU()(x)
     x = MaxPooling2D((2, 2), padding='same')(x)
+
     x = Flatten()(x)
-    x = Dense(256, activation='relu')(x)
+
+    x = Dense(latent_dim, activation='relu')(x)
     encoder_mean = Dense(latent_dim, name='mean')(x)
     encoder_log_var = Dense(latent_dim, name='log_var')(x)
 
     return Model(inputs=encoder_inputs,outputs=[encoder_mean,encoder_log_var], name='encoder')
 
-def build_decoder(encoder, kernel_shape=(3,3), latent_dim=8192):
+def build_decoder(encoder, kernel_shape=(3,3), latent_dim=256):
     latent_inputs = Input(shape=(latent_dim,), name='decoder_input')
+
     hidden_units = encoder.layers[-4].output_shape[1]
     x = Dense(hidden_units, activation='relu')(latent_inputs)
+
     hidden_shape = encoder.layers[-5].output_shape[1:]
     x = Reshape(hidden_shape)(x)
+
     x = UpSampling2D((2, 2))(x)
-    x = Conv2DTranspose(128, kernel_shape, activation='relu', padding='same')(x)
+    x = Conv2DTranspose(128, kernel_shape, padding='same')(x)
+    x = LeakyReLU()(x)
+    x = Conv2DTranspose(128, kernel_shape, padding='same')(x)
+    x = LeakyReLU()(x)
+
     x = UpSampling2D((2, 2))(x)
-    x = Conv2DTranspose(64, kernel_shape, activation='relu', padding='same')(x)
+    x = Conv2DTranspose(64, kernel_shape, padding='same')(x)
+    x = LeakyReLU()(x)
+    x = Conv2DTranspose(64, kernel_shape, padding='same')(x)
+    x = LeakyReLU()(x)
+
     x = UpSampling2D((2, 2))(x)
-    x = Conv2DTranspose(32, kernel_shape, activation='relu', padding='same')(x)
+    x = Conv2DTranspose(32, kernel_shape, padding='same')(x)
+    x = LeakyReLU()(x)
+    x = Conv2DTranspose(32, kernel_shape, padding='same')(x)
+    x = LeakyReLU()(x)
+
     decoder_outputs = Conv2DTranspose(3, kernel_shape, activation='sigmoid', padding='same', name='decoder')(x)
     return Model(inputs=latent_inputs, outputs=decoder_outputs, name='decoder')
 
@@ -72,14 +100,15 @@ def build_autoencoder(encoder, decoder, input_shape=(128, 128, 3), latent_dim=25
 
 def build_model(latent_dim=256):
     encoder = build_encoder(latent_dim=latent_dim)
-    encoder.summary()
     decoder = build_decoder(encoder=encoder, latent_dim=latent_dim)
-    decoder.summary()
     autoencoder = build_autoencoder(encoder,decoder)
-    autoencoder.summary()  
 
     opt = Adam(3e-4)
     autoencoder.compile(opt)
     return autoencoder, encoder, decoder
 
-# vae, _, _ = build_model(latent_dim=256)
+vae, encoder, decoder = build_model(latent_dim=256)
+
+# vae.summary()
+# encoder.summary()
+# decoder.summary()

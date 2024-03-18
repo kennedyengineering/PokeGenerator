@@ -85,7 +85,7 @@ def main():
         validation_split=config["validation_split"],  # FIXME: Does autoencoder need validation data split?
         shuffle=True,
         callbacks=[
-            tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True),
+            tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True, verbose=1),
         ],
     )
 
