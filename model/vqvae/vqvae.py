@@ -3,7 +3,7 @@
 from tensorflow import keras
 from tensorflow.keras import layers
 
-from vector_quantizer import VectorQuantizer
+from .vector_quantizer import VectorQuantizer
 
 def get_encoder(input_shape=(128,128,3), kernel_size=(3,3), latent_dim=16):
     encoder_inputs = keras.Input(shape=input_shape)
