@@ -3,7 +3,7 @@ import os
 import numpy as np
 import tensorflow as tf
 from train import load_dataset
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import glob
 import variational_autoencoder as vae
 from latent_diffusion import build_reverse_process_mlp_model, train_model, sample
@@ -17,74 +17,74 @@ from latent_diffusion import build_reverse_process_mlp_model, train_model, sampl
 #     epsilon = K.random_normal(shape=(batch, dim))
 #     return z_mean + K.exp(0.5 * z_log_var) * epsilon
 
-def display_images(images, titles=None, cols=5, figsize=(20, 10)):
-    """
-    Display a list of images in a grid.
+# def display_images(images, titles=None, cols=5, figsize=(20, 10)):
+#     """
+#     Display a list of images in a grid.
 
-    Args:
-        images: A list or array of images to display.
-        titles: Optional list of titles for each image.
-        cols: Number of columns in the image grid.
-        figsize: Tuple indicating the size of the figure.
-    """
-    n_images = len(images)
-    rows = (n_images + cols - 1) // cols
-    plt.figure(figsize=figsize)
-    for i, image in enumerate(images):
-        plt.subplot(rows, cols, i + 1)
-        plt.imshow(image, cmap='gray')  # Adjust as needed
-        if titles is not None:
-            plt.title(titles[i])
-        plt.axis('off')
-    plt.tight_layout()
-    plt.show()
+#     Args:
+#         images: A list or array of images to display.
+#         titles: Optional list of titles for each image.
+#         cols: Number of columns in the image grid.
+#         figsize: Tuple indicating the size of the figure.
+#     """
+#     n_images = len(images)
+#     rows = (n_images + cols - 1) // cols
+#     plt.figure(figsize=figsize)
+#     for i, image in enumerate(images):
+#         plt.subplot(rows, cols, i + 1)
+#         plt.imshow(image, cmap='gray')  # Adjust as needed
+#         if titles is not None:
+#             plt.title(titles[i])
+#         plt.axis('off')
+#     plt.tight_layout()
+#     plt.show()
 
-def interpolate_vectors(v1, v2, num_steps=10):
-    """Interpolates between two vectors with a specified number of steps."""
-    ratios = np.linspace(0, 1, num_steps)
-    interpolated_vectors = [(1 - ratio) * v1 + ratio * v2 for ratio in ratios]
-    return np.array(interpolated_vectors)
+# def interpolate_vectors(v1, v2, num_steps=10):
+#     """Interpolates between two vectors with a specified number of steps."""
+#     ratios = np.linspace(0, 1, num_steps)
+#     interpolated_vectors = [(1 - ratio) * v1 + ratio * v2 for ratio in ratios]
+#     return np.array(interpolated_vectors)
 
-def plot_interpolated_images(decoder, latent_vectors, figsize=(10, 2)):
-    """Plots a series of images showing the transition between two points."""
+# def plot_interpolated_images(decoder, latent_vectors, figsize=(10, 2)):
+#     """Plots a series of images showing the transition between two points."""
 
-    latent_vector_1 = latent_vectors[0]  # Replace 0 with a specific index
-    latent_vector_2 = latent_vectors[1]  # Replace 1 with another index
+#     latent_vector_1 = latent_vectors[0]  # Replace 0 with a specific index
+#     latent_vector_2 = latent_vectors[1]  # Replace 1 with another index
 
-    # Interpolate between the two latent vectors
-    interpolated_vectors = interpolate_vectors(
-        latent_vector_1, latent_vector_2, num_steps=10
-    )
+#     # Interpolate between the two latent vectors
+#     interpolated_vectors = interpolate_vectors(
+#         latent_vector_1, latent_vector_2, num_steps=10
+#     )
 
-    decoded_images = decoder.predict(interpolated_vectors)
+#     decoded_images = decoder.predict(interpolated_vectors)
 
-    plt.figure(figsize=figsize)
-    num_images = len(decoded_images)
-    for i, image in enumerate(decoded_images):
-        plt.subplot(1, num_images, i + 1)
-        plt.imshow(image)
-        plt.axis('off')
-    plt.tight_layout()
-    plt.show()
+#     plt.figure(figsize=figsize)
+#     num_images = len(decoded_images)
+#     for i, image in enumerate(decoded_images):
+#         plt.subplot(1, num_images, i + 1)
+#         plt.imshow(image)
+#         plt.axis('off')
+#     plt.tight_layout()
+#     plt.show()
 
-def generate_images(decoder, num_images=10, latent_dim=2048):
-    """
-    Generates images by sampling from the latent space and decoding.
+# def generate_images(decoder, num_images=10, latent_dim=2048):
+#     """
+#     Generates images by sampling from the latent space and decoding.
 
-    Args:
-        decoder: The decoder model.
-        num_images: Number of images to generate.
-        latent_dim: The dimensionality of the latent space.
-    """
-    # Sample random vectors from the normal distribution
-    random_latent_vectors = np.random.normal(size=(num_images, latent_dim))
-    print(random_latent_vectors.shape)
+#     Args:
+#         decoder: The decoder model.
+#         num_images: Number of images to generate.
+#         latent_dim: The dimensionality of the latent space.
+#     """
+#     # Sample random vectors from the normal distribution
+#     random_latent_vectors = np.random.normal(size=(num_images, latent_dim))
+#     print(random_latent_vectors.shape)
 
-    # Decode the random latent vectors into images
-    generated_images = decoder.predict(random_latent_vectors)
+#     # Decode the random latent vectors into images
+#     generated_images = decoder.predict(random_latent_vectors)
 
-    # Display the generated images
-    display_images(generated_images, cols=num_images, figsize=(20, 10))
+#     # Display the generated images
+#     display_images(generated_images, cols=num_images, figsize=(20, 10))
 
 def main():
     with open("model/training_config.json", "r") as f:
