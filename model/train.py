@@ -78,7 +78,7 @@ def main():
 
     history = model.fit(
         images,
-        images,
+        # images,
         batch_size=config["batch_size"],
         epochs=config["epochs"],
         validation_split=config["validation_split"], 
