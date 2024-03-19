@@ -16,7 +16,7 @@ def get_encoder(image_shape=(128,128,3), kernel_size=(3,3), latent_dim=16):
 
 
 def get_decoder(kernel_size=(3,3), latent_dim=16):
-    latent_inputs = keras.Input(shape=get_encoder(latent_dim).output.shape[1:])
+    latent_inputs = keras.Input(shape=get_encoder(kernel_size=kernel_size, latent_dim=latent_dim).output.shape[1:])
     x = layers.Conv2DTranspose(64, kernel_size, activation="relu", strides=2, padding="same")(
         latent_inputs
     )
