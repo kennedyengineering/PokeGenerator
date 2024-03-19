@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import glob
 import variational_autoencoder as vae
 from latent_diffusion import build_reverse_process_mlp_model, train_model, sample
+from datetime import datetime
 
 def display_images(images, titles=None, cols=5, figsize=(20, 10)):
     """
@@ -126,6 +127,13 @@ def main():
     
     # # Display the generated images
     display_images(decode_images, cols=10, figsize=(20, 10))
+
+    checkpoint_directory = config["checkpoint_directory"]
+    # Save the model
+    model.save(
+        checkpoint_directory
+        / ("latent_model_" + datetime.now().strftime("%Y-%m-%d-%H:%M:%S%z") + ".keras")
+    )
 
     # plot_interpolated_images(decoder, z_mean)
 
