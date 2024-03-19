@@ -32,8 +32,8 @@ def build_encoder(input_shape=(128, 128, 3), kernel_size=(5, 5), strides=(2,2), 
     return Model(inputs=encoder_input, outputs=[encoder_mean, encoder_log_var], name='encoder')
 
 def build_decoder(encoder, kernel_size=(5,5), strides=(2,2), latent_dim=256):
-    hidden_units = encoder.layers[-3].output_shape[1]
-    hidden_shape = encoder.layers[-].output_shape[1:]
+    hidden_units = encoder.layers[-4].output_shape[1]
+    hidden_shape = encoder.layers[-5].output_shape[1:]
 
     model = tf.keras.Sequential([
         Input(shape=(latent_dim,), name='decoder_input'),
@@ -92,8 +92,8 @@ def build_model(latent_dim=256):
     autoencoder.compile(opt)
     return autoencoder, encoder, decoder
 
-vae, encoder, decoder = build_model(latent_dim=2048)
+# vae, encoder, decoder = build_model(latent_dim=512)
 
-encoder.summary()
-decoder.summary()
-vae.summary()
+# encoder.summary()
+# decoder.summary()
+# vae.summary()

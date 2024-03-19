@@ -89,14 +89,20 @@ def main():
     encoder = variational_autoencoder.get_layer('encoder')
     decoder = variational_autoencoder.get_layer('decoder')
 
+    encoder.summary()
+    decoder.summary()
+    
     encoded_imgs = encoder.predict(images[2:4]) 
     z_mean = encoded_imgs[0]  
     z_log_var = encoded_imgs[1]
 
-    plot_interpolated_images(decoder, z_mean)
+    # Demonison of Latent Space
+    print(z_mean.shape)
 
-    reconstructed_images = variational_autoencoder.predict(images[:10])
-    display_images(reconstructed_images, titles=['Reconstructed'] * 10)
+    # plot_interpolated_images(decoder, z_mean)
+
+    # reconstructed_images = variational_autoencoder.predict(images[:10])
+    # display_images(reconstructed_images, titles=['Reconstructed'] * 10)
 
     # Generate and display random images from the latent space
     # generate_images(decoder, num_images=10, latent_dim=1024)
