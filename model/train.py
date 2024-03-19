@@ -13,7 +13,7 @@ import tensorflow as tf
 # from autoencoder import build_model
 #from conv_autoencoder import build_model
 from variational_autoencoder import build_model
-from vqvae.vqvae_trainer import VQVAETrainer
+# from vqvae.vqvae_trainer import VQVAETrainer
 
 
 CONFIG_FILE = "training_config.json"
@@ -49,7 +49,7 @@ def load_dataset(config):
     
     # Preprocess the dataset (Normalize to [-1, 1] range)   # FIXME: is [0 1 range better?] -- is necessary for binary_crossentropy loss
     # images = (images.astype(np.float32) / 127.5) - 1.0
-    images = images.astype(np.float32) / 255.0 - 0.5
+    images = images.astype(np.float32) / 255.0
 
     return images
 
@@ -69,22 +69,22 @@ def main():
 
     config = json.load(args.config_file)
     images = load_dataset(config)
-    images_variance = np.var(images / 255.0)
+    # images_variance = np.var(images / 255.0)
 
     # Build and train model, TODO: Add latent_dim to config file
-    # model, encoder, decoder = build_model(latent_dim=1024)
-    model = VQVAETrainer(images_variance)
-    model.compile(optimizer=tf.keras.optimizers.Adam(3e-4))
+    model, encoder, decoder = build_model(latent_dim=1024)
+    # model = VQVAETrainer(images_variance)
+    # model.compile(optimizer=tf.keras.optimizers.Adam(3e-4))
 
     history = model.fit(
         images,
-        # images,
+        images,
         batch_size=config["batch_size"],
         epochs=config["epochs"],
         validation_split=config["validation_split"], 
         shuffle=True,
         callbacks=[
-            tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True, verbose=1),
+            tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=(config["epochs"] // 50), restore_best_weights=True, verbose=1),
         ],
     )
 
