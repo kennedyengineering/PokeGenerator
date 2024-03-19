@@ -32,5 +32,7 @@ def get_vqvae(image_shape=(128,128,3), kernel_size=(3,3), latent_dim=16, num_emb
     encoder_outputs = encoder(inputs)
     quantized_latents = vq_layer(encoder_outputs)
     reconstructions = decoder(quantized_latents)
+    encoder.summary()
+    decoder.summary()
     return keras.Model(inputs, reconstructions, name="vq_vae")
 
