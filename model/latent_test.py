@@ -105,7 +105,7 @@ def main():
     print("Latent Space Dimension:", sampled_latent_vectors.shape[1])
 
     # Reverse Process Model
-    latent_diffusion_model = build_reverse_process_mlp_model(input_dim=sampled_latent_vectors.shape[1], num_layers=6, num_hidden=4096, T=100)
+    latent_diffusion_model = build_reverse_process_mlp_model(input_dim=sampled_latent_vectors.shape[1], num_layers=3, num_hidden=512, T=100)
     latent_diffusion_model.summary()
 
     # Training
