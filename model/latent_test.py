@@ -61,8 +61,9 @@ def main():
         config = json.load(f)
     images = load_dataset(config)
 
-    model_files = glob.glob("checkpoints/*.keras")
+    model_files = glob.glob("./checkpoints/*.keras")
     latest_model_file = max(model_files, key=os.path.getmtime)
+    print(f"Attempting to load model from: {latest_model_file}")
     variational_autoencoder = tf.keras.models.load_model(latest_model_file)
 
     encoder = variational_autoencoder.get_layer('encoder')

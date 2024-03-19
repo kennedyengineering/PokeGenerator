@@ -5,8 +5,8 @@ from tensorflow.keras import layers
 
 from .vector_quantizer import VectorQuantizer
 
-def get_encoder(input_shape=(128,128,3), kernel_size=(3,3), latent_dim=16):
-    encoder_inputs = keras.Input(shape=input_shape)
+def get_encoder(image_shape=(128,128,3), kernel_size=(3,3), latent_dim=16):
+    encoder_inputs = keras.Input(shape=image_shape)
     x = layers.Conv2D(32, kernel_size, activation="relu", strides=2, padding="same")(
         encoder_inputs
     )
@@ -24,11 +24,11 @@ def get_decoder(kernel_size=(3,3), latent_dim=16):
     decoder_outputs = layers.Conv2DTranspose(1, kernel_size, padding="same")(x)
     return keras.Model(latent_inputs, decoder_outputs, name="decoder")
 
-def get_vqvae(input_shape=(128,128,3), kernel_size=(3,3), latent_dim=16, num_embeddings=64):
+def get_vqvae(image_shape=(128,128,3), kernel_size=(3,3), latent_dim=16, num_embeddings=64):
     vq_layer = VectorQuantizer(num_embeddings, latent_dim, name="vector_quantizer")
-    encoder = get_encoder(input_shape= input_shape,kernel_size=kernel_size, latent_dim=latent_dim)
+    encoder = get_encoder(image_shape= image_shape,kernel_size=kernel_size, latent_dim=latent_dim)
     decoder = get_decoder(kernel_size=kernel_size, latent_dim=latent_dim)
-    inputs = keras.Input(shape=input_shape)
+    inputs = keras.Input(shape=image_shape)
     encoder_outputs = encoder(inputs)
     quantized_latents = vq_layer(encoder_outputs)
     reconstructions = decoder(quantized_latents)

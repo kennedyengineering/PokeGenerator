@@ -6,16 +6,16 @@ from tensorflow import keras
 from vqvae import get_vqvae
 
 class VQVAETrainer(keras.models.Model):
-    def __init__(self, train_variance, input_shape=(128,128,3), kernel_size=(3,3), latent_dim=32, num_embeddings=128, **kwargs):
+    def __init__(self, train_variance, image_shape=(128,128,3), kernel_size=(3,3), latent_dim=32, num_embeddings=128, **kwargs):
         super().__init__(**kwargs)
         self.train_variance = train_variance
-        self.input_shape = input_shape
+        self.image_shape = image_shape
         self.kernel_size = kernel_size
         self.latent_dim = latent_dim
         self.num_embeddings = num_embeddings
 
         self.vqvae = get_vqvae(
-            self.input_shape, self.kernel_size, self.latent_dim, 
+            self.image_shape, self.kernel_size, self.latent_dim, 
             self.num_embeddings
         )
 
