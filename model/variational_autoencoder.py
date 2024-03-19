@@ -50,18 +50,26 @@ def build_decoder(encoder, kernel_size=(5,5), strides=(2,2), latent_dim=256):
 
     return model
 
+# Reparameterization trick to sample z
+def sampling(args):
+    z_mean, z_log_var = args
+    batch = K.shape(z_mean)[0]
+    dim = K.int_shape(z_mean)[1]
+    epsilon = K.random_normal(shape=(batch, dim))
+    return z_mean + K.exp(0.5 * z_log_var) * epsilon
+
 def build_autoencoder(encoder, decoder, input_shape=(128, 128, 3), latent_dim=256, beta=1):
     # Define encoder input and get latent vectors
     encoder_inputs = Input(shape=input_shape, name='autoencoder_input')
     z_mean, z_log_var = encoder(encoder_inputs)
 
-    # Reparameterization trick to sample z
-    def sampling(args):
-        z_mean, z_log_var = args
-        batch = K.shape(z_mean)[0]
-        dim = K.int_shape(z_mean)[1]
-        epsilon = K.random_normal(shape=(batch, dim))
-        return z_mean + K.exp(0.5 * z_log_var) * epsilon
+    # # Reparameterization trick to sample z
+    # def sampling(args):
+    #     z_mean, z_log_var = args
+    #     batch = K.shape(z_mean)[0]
+    #     dim = K.int_shape(z_mean)[1]
+    #     epsilon = K.random_normal(shape=(batch, dim))
+    #     return z_mean + K.exp(0.5 * z_log_var) * epsilon
 
     # Apply sampling function
     z = Lambda(sampling, output_shape=(latent_dim,), name='z')([z_mean, z_log_var])

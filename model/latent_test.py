@@ -5,6 +5,17 @@ import tensorflow as tf
 from train import load_dataset
 import matplotlib.pyplot as plt
 import glob
+import variational_autoencoder as vae
+from latent_diffusion import build_reverse_process_mlp_model, train_model, sample
+
+# from tensorflow.keras import backend as K
+
+# def sampling(args):
+#     z_mean, z_log_var = args
+#     batch = K.shape(z_mean)[0]
+#     dim = K.int_shape(z_mean)[1]
+#     epsilon = K.random_normal(shape=(batch, dim))
+#     return z_mean + K.exp(0.5 * z_log_var) * epsilon
 
 def display_images(images, titles=None, cols=5, figsize=(20, 10)):
     """
@@ -68,7 +79,6 @@ def generate_images(decoder, num_images=10, latent_dim=2048):
     # Sample random vectors from the normal distribution
     random_latent_vectors = np.random.normal(size=(num_images, latent_dim))
     print(random_latent_vectors.shape)
-    print(random_latent_vectors[0])
 
     # Decode the random latent vectors into images
     generated_images = decoder.predict(random_latent_vectors)
@@ -89,23 +99,50 @@ def main():
     encoder = variational_autoencoder.get_layer('encoder')
     decoder = variational_autoencoder.get_layer('decoder')
 
-    encoder.summary()
-    decoder.summary()
+    # encoder.summary()
+    # decoder.summary()
     
-    encoded_imgs = encoder.predict(images[2:4]) 
-    z_mean = encoded_imgs[0]  
-    z_log_var = encoded_imgs[1]
+    # encoded_imgs = encoder.predict(images[:2]) 
+    latent_vectors = encoder.predict(images)
+    z_mean, z_log_var = latent_vectors
 
+    sampled_latent_vectors = vae.sampling(latent_vectors)
+
+    # Ensure the shape is what your model expects
+    print("Sampled latent vectors shape:", sampled_latent_vectors.shape) 
     # Demonison of Latent Space
-    print(z_mean.shape)
+    print("Latent Space Dimension:", sampled_latent_vectors.shape[1])
+
+    # Reverse Process Model
+    latent_diffusion_model = build_reverse_process_mlp_model(input_dim=sampled_latent_vectors.shape[1], num_layers=3, num_hidden=512, T=100)
+    latent_diffusion_model.summary()
+
+    # Training
+    T = 1000
+    betas = np.linspace(1e-4, .02, T)
+    sigmas = np.sqrt(betas)
+    alphas = 1 - betas
+    alphas_cumprod = np.cumprod(alphas, axis=-1)
+
+    batch_size = 128
+
+    model = train_model(sampled_latent_vectors, batch_size, T, alphas_cumprod, latent_diffusion_model, epochs=100)
+
+    # Sample
+    ld_sampled_vectors = sample(model, sampled_latent_vectors.shape, T, sigmas, alphas, alphas_cumprod) 
+    decode_images = decoder.predict(ld_sampled_vectors)
+
+    
+    # # Display the generated images
+    # display_images(decode_images, cols=10, figsize=(20, 10))
 
     # plot_interpolated_images(decoder, z_mean)
 
     # reconstructed_images = variational_autoencoder.predict(images[:10])
     # display_images(reconstructed_images, titles=['Reconstructed'] * 10)
 
-    # Generate and display random images from the latent space
-    # generate_images(decoder, num_images=10, latent_dim=1024)
+    # # Generate and display random images from the latent space
+    # generate_images(decoder, num_images=10, latent_dim=512)
 
 if __name__ == "__main__":
     main()

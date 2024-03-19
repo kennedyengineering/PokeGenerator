@@ -38,55 +38,54 @@ def build_reverse_process_mlp_model(input_dim, num_layers, num_hidden, T):
     # Output layer: output a vector matching the latent vector dimension
     output = layers.Dense(input_dim, activation=None)(x)
 
-    model = keras.Model(inputs=[latent_input, timestep_input], outputs=output)
+    model = keras.Model(inputs=[latent_input, timestep_input], outputs=output, name='reverse_process_mlp_model')
     return model
 
-def training(latent_vectors, batch_size, T, alphas_cumprod, model, epochs=100):
-    train_dataset = tf.data.Dataset.from_tensor_slices(latent_vectors)
-    train_dataset = train_dataset.shuffle(buffer_size=1024).batch(batch_size)
+def prepare_dataset(latent_vectors, batch_size):
+    """Prepares the training dataset from latent vectors."""
+    dataset = tf.data.Dataset.from_tensor_slices(latent_vectors)
+    return dataset.shuffle(buffer_size=1024).batch(batch_size)
 
-    opt = keras.optimizers.Adam(3e-4)
+def generate_training_batch(x_batch_train, T, alphas_cumprod):
+    """Generates a training batch with corresponding noise and timesteps."""
+    # Generate a batch of timesteps
+    t = np.random.randint(T, size=(len(x_batch_train),1))
+
+    # Generate noise
+    noise = np.random.normal(size=x_batch_train.shape)
+
+    # Calculate at for each timestep in the batch
+    at = alphas_cumprod[t]
+    at = np.reshape(at,(-1,1))
+
+    # Calculate inputs considering the shape of x_batch_train is (batch_size, 512)
+    inputs = np.sqrt(at) * x_batch_train + (1 - at) * noise
+
+    return inputs, noise, t
+
+def train_epoch(dataset, model, optimizer, loss_fn, T, alphas_cumprod):
+    """Trains the model for one epoch."""
+    total_loss = 0
+    for x_batch_train in dataset:
+        inputs, noise, t = generate_training_batch(x_batch_train, T, alphas_cumprod)
+        with tf.GradientTape() as tape:
+            est_noise = model([inputs, t])
+            loss_value = loss_fn(noise, est_noise)
+        grads = tape.gradient(loss_value, model.trainable_weights)
+        optimizer.apply_gradients(zip(grads, model.trainable_weights))
+        total_loss += loss_value.numpy()
+    return total_loss / len(dataset)
+
+def train_model(latent_vectors, batch_size, T, alphas_cumprod, model, epochs=100):
+    """Trains the latent diffusion model."""
+    train_dataset = prepare_dataset(latent_vectors, batch_size)
+    optimizer = keras.optimizers.Adam(3e-4)
     loss_fn = keras.losses.MeanSquaredError()
 
     for epoch in range(epochs):
-        total_loss = 0
-    
-        # pbar = tqdm(total=len(train_dataset))
-        for step, x_batch_train in enumerate(train_dataset):
-            # t = np.random.randint(T,size=len(x_batch_train))
-        
-            # Generate a batch of timesteps
-            t = np.random.randint(T, size=(len(x_batch_train), 1))
-        
-            # Generate noise
-            noise = np.random.normal(size=x_batch_train.shape)
-        
-            # Calculate at for each timestep in the batch
-            at = alphas_cumprod[t]
-            at = np.reshape(at, (-1, 1))
-        
-            # Calculate inputs considering the shape of x_batch_train is (batch_size, 2)
-            inputs = np.sqrt(at) * x_batch_train + (1 - at) * noise
-    
-            with tf.GradientTape() as tape:
-                # Model expects a list of inputs: [latent_vector, timestep]
-                est_noise = model([inputs, t])
-        
-                loss_value = loss_fn(noise, est_noise)
-        
-                total_loss += loss_value.numpy()
-        
-            grads = tape.gradient(loss_value, model.trainable_weights)
-            opt.apply_gradients(zip(grads, model.trainable_weights))
-    
-        #     pbar.update(1)
-        # pbar.close()
-    
-        total_loss /= len(train_dataset)
-        print(f'loss at epoch {epoch}: {total_loss}')
-   
+        total_loss = train_epoch(train_dataset, model, optimizer, loss_fn, T, alphas_cumprod)
+        print(f'Loss at epoch {epoch}: {total_loss}')
     return model
-
 
 def sample(model, shape, T, sigmas, alphas, alphas_cumprod):
   """ Samples from the diffusion model.
@@ -114,3 +113,7 @@ def sample(model, shape, T, sigmas, alphas, alphas_cumprod):
     a_bar = alphas_cumprod[t]
     x = 1/np.sqrt(a)*(x - (1-a)/np.sqrt(1-a_bar)*eps)+sigma*z
   return x
+
+# # Testing Creating the Model
+# model = build_reverse_process_mlp_model(512, 3, 256, 1000)
+# model.summary()

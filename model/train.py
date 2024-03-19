@@ -15,7 +15,6 @@ import tensorflow as tf
 from variational_autoencoder import build_model
 # from vqvae.vqvae_trainer import VQVAETrainer
 
-
 CONFIG_FILE = "training_config.json"
 
 
@@ -47,7 +46,8 @@ def load_dataset(config):
         # Update cache
         images.dump(config["dataset_cache"])
     
-    # Preprocess the dataset (Normalize to [-1, 1] range)   # FIXME: is [0 1 range better?] -- is necessary for binary_crossentropy loss
+    # Preprocess the dataset (Normalize to [-1, 1] range)   
+    # FIXME: is [0 1 range better?] -- is necessary for binary_crossentropy loss
     # images = (images.astype(np.float32) / 127.5) - 1.0
     images = images.astype(np.float32) / 255.0
 
@@ -72,31 +72,31 @@ def main():
     # images_variance = np.var(images / 255.0)
 
     # Build and train model, TODO: Add latent_dim to config file
-    model, encoder, decoder = build_model(latent_dim=1024)
+    # model, encoder, decoder = build_model(latent_dim=1024)
     # model = VQVAETrainer(images_variance)
     # model.compile(optimizer=tf.keras.optimizers.Adam(3e-4))
 
-    history = model.fit(
-        images,
-        images,
-        batch_size=config["batch_size"],
-        epochs=config["epochs"],
-        validation_split=config["validation_split"], 
-        shuffle=True,
-        callbacks=[
-            tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=(config["epochs"] // 50), restore_best_weights=True, verbose=1),
-        ],
-    )
+    # history = model.fit(
+    #     images,
+    #     images,
+    #     batch_size=config["batch_size"],
+    #     epochs=config["epochs"],
+    #     validation_split=config["validation_split"], 
+    #     shuffle=True,
+    #     callbacks=[
+    #         tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=(config["epochs"] // 50), restore_best_weights=True, verbose=1),
+    #     ],
+    # )
 
-    # Save the model
-    # TODO: Add checkpointing, save models every X epochs to an directory corresponding to a training run
-    # TODO: Use callbacks to save model checkpoints, and produce example inference image (to show progression)
-    checkpoint_directory = Path(config["checkpoint_directory"])
-    checkpoint_directory.mkdir(exist_ok=True)
-    model.save(
-        checkpoint_directory
-        / ("model_" + datetime.now().strftime("%Y-%m-%d-%H:%M:%S%z") + ".keras")
-    )
+    # # Save the model
+    # # TODO: Add checkpointing, save models every X epochs to an directory corresponding to a training run
+    # # TODO: Use callbacks to save model checkpoints, and produce example inference image (to show progression)
+    # checkpoint_directory = Path(config["checkpoint_directory"])
+    # checkpoint_directory.mkdir(exist_ok=True)
+    # model.save(
+    #     checkpoint_directory
+    #     / ("model_" + datetime.now().strftime("%Y-%m-%d-%H:%M:%S%z") + ".keras")
+    # )
 
 if __name__ == "__main__":
     main()
