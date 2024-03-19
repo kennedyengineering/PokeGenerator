@@ -21,7 +21,7 @@ def get_decoder(kernel_size=(3,3), latent_dim=16):
         latent_inputs
     )
     x = layers.Conv2DTranspose(32, kernel_size, activation="relu", strides=2, padding="same")(x)
-    decoder_outputs = layers.Conv2DTranspose(1, kernel_size, padding="same")(x)
+    decoder_outputs = layers.Conv2DTranspose(3, kernel_size, padding="same")(x)
     return keras.Model(latent_inputs, decoder_outputs, name="decoder")
 
 def get_vqvae(image_shape=(128,128,3), kernel_size=(3,3), latent_dim=16, num_embeddings=64):
