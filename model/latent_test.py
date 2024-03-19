@@ -8,15 +8,6 @@ import glob
 import variational_autoencoder as vae
 from latent_diffusion import build_reverse_process_mlp_model, train_model, sample
 
-# from tensorflow.keras import backend as K
-
-# def sampling(args):
-#     z_mean, z_log_var = args
-#     batch = K.shape(z_mean)[0]
-#     dim = K.int_shape(z_mean)[1]
-#     epsilon = K.random_normal(shape=(batch, dim))
-#     return z_mean + K.exp(0.5 * z_log_var) * epsilon
-
 def display_images(images, titles=None, cols=5, figsize=(20, 10)):
     """
     Display a list of images in a grid.
@@ -87,11 +78,11 @@ def generate_images(decoder, num_images=10, latent_dim=2048):
     display_images(generated_images, cols=num_images, figsize=(20, 10))
 
 def main():
-    with open("model/training_config.json", "r") as f:
+    with open("training_config.json", "r") as f:
         config = json.load(f)
     images = load_dataset(config)
 
-    model_files = glob.glob("model/checkpoints/*.keras")
+    model_files = glob.glob("checkpoints/*.keras")
     latest_model_file = max(model_files, key=os.path.getmtime)
     print(f"Attempting to load model from: {latest_model_file}")
     variational_autoencoder = tf.keras.models.load_model(latest_model_file)
