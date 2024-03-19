@@ -13,26 +13,29 @@ def build_encoder(input_shape=(128, 128, 3), kernel_size=(5, 5), strides=(2,2), 
     encoder_inputs = Input(shape=input_shape, name='encoder_input')
     x = Conv2D(32, kernel_size=kernel_size, strides=strides, padding='same')(encoder_inputs)
     x = Activation(swish)(x)
-    x = BatchNormalization()(x)
+    # x = BatchNormalization()(x)
     # x = Conv2D(32, kernel_size= kernel_size, strides=strides, padding='same')(x)  
     # x = Activation(swish)(x)
 
     x = Conv2D(64, kernel_size=kernel_size, strides=strides, padding='same')(x)
     x = Activation(swish)(x)
-    x = BatchNormalization()(x)
+    # x = BatchNormalization()(x)
     # x = Conv2D(64, kernel_size=kernel_size, strides=strides, padding='same')(x)
     # x = Activation(swish)(x)
 
     x = Conv2D(128, kernel_size=kernel_size, strides=strides, padding='same')(x)
     x = Activation(swish)(x)
-    x = BatchNormalization()(x)
+    # x = BatchNormalization()(x)
     # x = Conv2D(128, kernel_size=kernel_size, strides=strides, padding='same')(x)
     # x = Activation(swish)(x)
 
     x = Conv2D(256, kernel_size=kernel_size, strides=strides, padding='same')(x)
     x = Activation(swish)(x)
-    x = BatchNormalization()(x)
+    # x = BatchNormalization()(x)
     # x = Conv2D(256, kernel_size=kernel_size, strides=strides, padding='same')(x)
+
+    x = Conv2D(512, kernel_size=kernel_size, strides=strides, padding='same')(x)
+    x = Activation(swish)(x)
     # x = Activation(swish)(x)
 
     x = Flatten()(x)
@@ -51,29 +54,32 @@ def build_decoder(encoder, kernel_size=(5,5), strides=(2,2), latent_dim=256):
     # Assume the same dense architecture as the encoder for symmetry
     hidden_units = encoder.layers[-5].output_shape[1]
     x = Dense(hidden_units)(latent_inputs)
-    x = Activation(swish)(x)  # Use swish activation function
 
     hidden_shape = encoder.layers[-6].output_shape[1:]
     x = Reshape(hidden_shape)(x)
 
     x = UpSampling2D((2, 2))(x)
+
+    x = Conv2DTranspose(512, kernel_size=kernel_size, strides=strides, padding='same')(x)
+    x = Activation(swish)(x)
+
     x = Conv2DTranspose(256, kernel_size, strides=strides, padding='same')(x)
     x = Activation(swish)(x)
 
-    x = UpSampling2D((2, 2))(x)
-    x = BatchNormalization()(x)
+    # x = UpSampling2D((2, 2))(x)
+    # x = BatchNormalization()(x)
     x = Conv2DTranspose(128, kernel_size=kernel_size, strides=strides, padding='same')(x)
     x = Activation(swish)(x)
 
-    x = UpSampling2D((2, 2))(x)
-    x = BatchNormalization()(x)
-    x = Conv2DTranspose(64, kernel_size=kernel_size, strides=strides, padding='same')(x)
-    x = Activation(swish)(x)
+    # x = UpSampling2D((2, 2))(x)
+    # x = BatchNormalization()(x)
+    # x = Conv2DTranspose(64, kernel_size=kernel_size, strides=strides, padding='same')(x)
+    # x = Activation(swish)(x)
 
-    x = UpSampling2D((2, 2))(x)
-    x = BatchNormalization()(x)
-    x = Conv2DTranspose(32, kernel_size=kernel_size, strides=strides, padding='same')(x)
-    x = Activation(swish)(x)
+    # x = UpSampling2D((2, 2))(x)
+    # x = BatchNormalization()(x)
+    # x = Conv2DTranspose(32, kernel_size=kernel_size, strides=strides, padding='same')(x)
+    # x = Activation(swish)(x)
 
     decoder_outputs = Conv2DTranspose(3, kernel_size=kernel_size, strides=strides, activation='sigmoid', padding='same', name='decoder')(x)
     return Model(inputs=latent_inputs, outputs=decoder_outputs, name='decoder')
@@ -112,16 +118,16 @@ def build_autoencoder(encoder, decoder, input_shape=(128, 128, 3), latent_dim=25
     return vae
 
 def build_model(latent_dim=256):
-    encoder = build_encoder(latent_dim=latent_dim, kernel_size=4, strides=2)
-    decoder = build_decoder(encoder=encoder, latent_dim=latent_dim, kernel_size=3, strides=1)
+    encoder = build_encoder(latent_dim=latent_dim, kernel_size=5, strides=2)
+    decoder = build_decoder(encoder=encoder, kernel_size=4, latent_dim=latent_dim,  strides=2)
     autoencoder = build_autoencoder(encoder,decoder)
 
     opt = Adam(3e-4)
     autoencoder.compile(opt)
     return autoencoder, encoder, decoder
 
-# vae, encoder, decoder = build_model(latent_dim=2048)
+vae, encoder, decoder = build_model(latent_dim=2048)
 
-# vae.summary()
-# encoder.summary()
-# decoder.summary()
+vae.summary()
+encoder.summary()
+decoder.summary()
