@@ -8,81 +8,47 @@ from tensorflow.keras import backend as K
 from tensorflow.keras.losses import mse
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.activations import swish, tanh
+import tensorflow as tf
 
 def build_encoder(input_shape=(128, 128, 3), kernel_size=(5, 5), strides=(2,2), latent_dim=256):
-    encoder_inputs = Input(shape=input_shape, name='encoder_input')
-    x = Conv2D(32, kernel_size=kernel_size, strides=strides, padding='same')(encoder_inputs)
-    x = Activation(swish)(x)
-    # x = BatchNormalization()(x)
-    # x = Conv2D(32, kernel_size= kernel_size, strides=strides, padding='same')(x)  
-    # x = Activation(swish)(x)
+    model = tf.keras.Sequential([
+        Input(shape=input_shape, name='encoder_input'),
+        Conv2D(32, kernel_size=kernel_size, strides=strides, padding='same', activation=swish),
+        Conv2D(64, kernel_size=kernel_size, strides=strides, padding='same', activation=swish),
+        Conv2D(128, kernel_size=kernel_size, strides=strides, padding='same', activation=swish),
+        Conv2D(256, kernel_size=kernel_size, strides=strides, padding='same', activation=swish),
+        Conv2D(512, kernel_size=kernel_size, strides=strides, padding='same', activation=swish),
+        Conv2D(1024, kernel_size=kernel_size, strides=strides, padding='same', activation=swish),
+        Flatten(),
+        Dense(latent_dim, activation=tanh)
+    ])
 
-    x = Conv2D(64, kernel_size=kernel_size, strides=strides, padding='same')(x)
-    x = Activation(swish)(x)
-    # x = BatchNormalization()(x)
-    # x = Conv2D(64, kernel_size=kernel_size, strides=strides, padding='same')(x)
-    # x = Activation(swish)(x)
+    encoder_input = model.input
+    encoder_output = model.output
 
-    x = Conv2D(128, kernel_size=kernel_size, strides=strides, padding='same')(x)
-    x = Activation(swish)(x)
-    # x = BatchNormalization()(x)
-    # x = Conv2D(128, kernel_size=kernel_size, strides=strides, padding='same')(x)
-    # x = Activation(swish)(x)
+    encoder_mean = Dense(latent_dim, name='mean')(encoder_output)
+    encoder_log_var = Dense(latent_dim, name='log_var')(encoder_output)
 
-    x = Conv2D(256, kernel_size=kernel_size, strides=strides, padding='same')(x)
-    x = Activation(swish)(x)
-    # x = BatchNormalization()(x)
-    # x = Conv2D(256, kernel_size=kernel_size, strides=strides, padding='same')(x)
-
-    x = Conv2D(512, kernel_size=kernel_size, strides=strides, padding='same')(x)
-    x = Activation(swish)(x)
-    # x = Activation(swish)(x)
-
-    x = Flatten()(x)
-    x = Dense(x.shape[1]//2)(x)  # Added dense layer before latent space
-    x = Activation(tanh)(x)
-
-    # mean and log-variance for latent space
-    encoder_mean = Dense(latent_dim, name='mean')(x)
-    encoder_log_var = Dense(latent_dim, name='log_var')(x)
-
-    return Model(inputs=encoder_inputs, outputs=[encoder_mean, encoder_log_var], name='encoder')
+    return Model(inputs=encoder_input, outputs=[encoder_mean, encoder_log_var], name='encoder')
 
 def build_decoder(encoder, kernel_size=(5,5), strides=(2,2), latent_dim=256):
-    latent_inputs = Input(shape=(latent_dim,), name='decoder_input')
+    hidden_units = encoder.layers[-3].output_shape[1]
+    hidden_shape = encoder.layers[-].output_shape[1:]
 
-    # Assume the same dense architecture as the encoder for symmetry
-    hidden_units = encoder.layers[-5].output_shape[1]
-    x = Dense(hidden_units)(latent_inputs)
+    model = tf.keras.Sequential([
+        Input(shape=(latent_dim,), name='decoder_input'),
+        Dense(hidden_units, activation='relu'),
+        Reshape(hidden_shape),
+        Conv2DTranspose(512, kernel_size=kernel_size, strides=strides, padding='same', activation=swish),
+        Conv2DTranspose(256, kernel_size=kernel_size, strides=strides, padding='same', activation=swish),
+        Conv2DTranspose(128, kernel_size=kernel_size, strides=strides, padding='same', activation=swish),
+        Conv2DTranspose(64, kernel_size=kernel_size, strides=strides, padding='same', activation=swish),
+        Conv2DTranspose(32, kernel_size=kernel_size, strides=strides, padding='same', activation=swish),
+        Conv2DTranspose(3, kernel_size=kernel_size, strides=strides,
+        padding='same', activation='sigmoid', name='decoder_output')
+    ], name='decoder')
 
-    hidden_shape = encoder.layers[-6].output_shape[1:]
-    x = Reshape(hidden_shape)(x)
-
-    x = UpSampling2D((2, 2))(x)
-
-    x = Conv2DTranspose(512, kernel_size=kernel_size, strides=strides, padding='same')(x)
-    x = Activation(swish)(x)
-
-    x = Conv2DTranspose(256, kernel_size, strides=strides, padding='same')(x)
-    x = Activation(swish)(x)
-
-    # x = UpSampling2D((2, 2))(x)
-    # x = BatchNormalization()(x)
-    x = Conv2DTranspose(128, kernel_size=kernel_size, strides=strides, padding='same')(x)
-    x = Activation(swish)(x)
-
-    # x = UpSampling2D((2, 2))(x)
-    # x = BatchNormalization()(x)
-    # x = Conv2DTranspose(64, kernel_size=kernel_size, strides=strides, padding='same')(x)
-    # x = Activation(swish)(x)
-
-    # x = UpSampling2D((2, 2))(x)
-    # x = BatchNormalization()(x)
-    # x = Conv2DTranspose(32, kernel_size=kernel_size, strides=strides, padding='same')(x)
-    # x = Activation(swish)(x)
-
-    decoder_outputs = Conv2DTranspose(3, kernel_size=kernel_size, strides=strides, activation='sigmoid', padding='same', name='decoder')(x)
-    return Model(inputs=latent_inputs, outputs=decoder_outputs, name='decoder')
+    return model
 
 def build_autoencoder(encoder, decoder, input_shape=(128, 128, 3), latent_dim=256, beta=1):
     # Define encoder input and get latent vectors
@@ -118,8 +84,8 @@ def build_autoencoder(encoder, decoder, input_shape=(128, 128, 3), latent_dim=25
     return vae
 
 def build_model(latent_dim=256):
-    encoder = build_encoder(latent_dim=latent_dim, kernel_size=5, strides=2)
-    decoder = build_decoder(encoder=encoder, kernel_size=4, latent_dim=latent_dim,  strides=2)
+    encoder = build_encoder(latent_dim=latent_dim, kernel_size=4, strides=2)
+    decoder = build_decoder(encoder=encoder, kernel_size=3, latent_dim=latent_dim,  strides=2)
     autoencoder = build_autoencoder(encoder,decoder)
 
     opt = Adam(3e-4)
@@ -128,6 +94,6 @@ def build_model(latent_dim=256):
 
 vae, encoder, decoder = build_model(latent_dim=2048)
 
-vae.summary()
 encoder.summary()
 decoder.summary()
+vae.summary()

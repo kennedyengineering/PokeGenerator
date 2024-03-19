@@ -56,12 +56,32 @@ def plot_interpolated_images(decoder, latent_vectors, figsize=(10, 2)):
     plt.tight_layout()
     plt.show()
 
+def generate_images(decoder, num_images=10, latent_dim=2048):
+    """
+    Generates images by sampling from the latent space and decoding.
+
+    Args:
+        decoder: The decoder model.
+        num_images: Number of images to generate.
+        latent_dim: The dimensionality of the latent space.
+    """
+    # Sample random vectors from the normal distribution
+    random_latent_vectors = np.random.normal(size=(num_images, latent_dim))
+    print(random_latent_vectors.shape)
+    print(random_latent_vectors[0])
+
+    # Decode the random latent vectors into images
+    generated_images = decoder.predict(random_latent_vectors)
+
+    # Display the generated images
+    display_images(generated_images, cols=num_images, figsize=(20, 10))
+
 def main():
-    with open("training_config.json", "r") as f:
+    with open("model/training_config.json", "r") as f:
         config = json.load(f)
     images = load_dataset(config)
 
-    model_files = glob.glob("./checkpoints/*.keras")
+    model_files = glob.glob("model/checkpoints/*.keras")
     latest_model_file = max(model_files, key=os.path.getmtime)
     print(f"Attempting to load model from: {latest_model_file}")
     variational_autoencoder = tf.keras.models.load_model(latest_model_file)
@@ -69,13 +89,17 @@ def main():
     encoder = variational_autoencoder.get_layer('encoder')
     decoder = variational_autoencoder.get_layer('decoder')
 
-    encoded_imgs = encoder.predict(images[:2]) 
+    encoded_imgs = encoder.predict(images[2:4]) 
     z_mean = encoded_imgs[0]  
+    z_log_var = encoded_imgs[1]
 
     plot_interpolated_images(decoder, z_mean)
 
     reconstructed_images = variational_autoencoder.predict(images[:10])
     display_images(reconstructed_images, titles=['Reconstructed'] * 10)
+
+    # Generate and display random images from the latent space
+    # generate_images(decoder, num_images=10, latent_dim=1024)
 
 if __name__ == "__main__":
     main()
