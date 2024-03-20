@@ -1,5 +1,5 @@
 from tensorflow import keras
-from tensorflow.keras import layers
+from tensorflow.keras import layers, models, regularizers
 import tensorflow as tf
 import numpy as np
 from tqdm.auto import tqdm, trange
@@ -33,7 +33,7 @@ def build_reverse_process_mlp_model(input_dim, num_layers, num_hidden, T):
     # Process concatenated inputs through the MLP
     x = concatenated
     for _ in range(num_layers):
-        x = layers.Dense(num_hidden, activation='relu')(x)
+        x = layers.Dense(num_hidden, activation='swish')(x)
 
     # Output layer: output a vector matching the latent vector dimension
     output = layers.Dense(input_dim, activation=None)(x)
@@ -87,33 +87,36 @@ def train_model(latent_vectors, batch_size, T, alphas_cumprod, model, epochs=100
         print(f'Loss at epoch {epoch}: {total_loss}')
     return model
 
-def sample(model, shape, T, sigmas, alphas, alphas_cumprod):
-  """ Samples from the diffusion model.
 
-  Arguments:
-    model: reverse process model
-    shape: shape of data to be sampled; should be [N,H,W,1]
-  Returns:
-    Sampled images
-  """
-  # sample normally-distributed random noise (x_T)
-  x = np.random.normal(size=shape)
+def sample(model, num_samples, latent_dim, T, sigmas, alphas, alphas_cumprod):
+    """ Samples from the diffusion model.
+  
+    Arguments:
+      model: reverse process model
+      num_samples: number of latent vectors to sample
+      latent_dim: the dimensionality of the latent vectors
+      T: number of diffusion timesteps
+      sigmas: noise levels for each timestep
+      alphas: signal rates for each timestep
+      alphas_cumprod: cumulative product of alphas
+    Returns:
+      Sampled latent vectors
+    """
+    # Initialize random noise as the starting point for sampling (x_T)
+    x = np.random.normal(size=(num_samples, latent_dim))
 
-  # iterate through timesteps from T-1 to 0
-  for t in trange(T-1,-1,-1):
-    # sample noise unless at final step (which is deterministic)
-    z = np.random.normal(size=shape) if t > 0 else np.zeros(shape)
+    # Iterate through timesteps from T-1 to 0
+    for t in trange(T-1, -1, -1):
+        # Sample noise unless at the final step (which is deterministic)
+        z = np.random.normal(size=(num_samples, latent_dim)) if t > 0 else np.zeros((num_samples, latent_dim))
 
-    # estimate correction using model conditioned on timestep
-    eps = model.predict([x,np.ones((shape[0],1))*t],verbose=False)
+        # Estimate the correction (epsilon) using the model conditioned on the current timestep
+        timesteps = np.full((num_samples, 1), t)  # Timestep t repeated for each sample
+        eps = model.predict([x, timesteps], verbose=False)
 
-    # apply update formula
-    sigma = sigmas[t]
-    a = alphas[t]
-    a_bar = alphas_cumprod[t]
-    x = 1/np.sqrt(a)*(x - (1-a)/np.sqrt(1-a_bar)*eps)+sigma*z
-  return x
-
-# # Testing Creating the Model
-# model = build_reverse_process_mlp_model(512, 3, 256, 1000)
-# model.summary()
+        # Apply the update formula for the reverse diffusion process
+        sigma = sigmas[t]
+        a = alphas[t]
+        a_bar = alphas_cumprod[t]
+        x = (x - (1 - a) / np.sqrt(1 - a_bar) * eps) / np.sqrt(a) + sigma * z
+    return x
