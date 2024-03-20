@@ -1,5 +1,9 @@
 # PokeGenerator Model
 
+## Configuration
+
+```vim config.json```
+
 ## Training
 
 ```python3 train.py```
@@ -15,3 +19,7 @@
 ## Best Latent Model so Far:
 
 ```latent_model_2024-03-19-17:41:00.keras```
+
+## Inference
+
+```python3 inference.py```

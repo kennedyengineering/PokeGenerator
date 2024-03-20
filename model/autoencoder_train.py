@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import numpy as np
 from pathlib import Path
 from datetime import datetime
 import imageio.v3 as iio
@@ -68,25 +69,32 @@ def main():
     args = parser.parse_args()
 
     config = json.load(args.config_file)
-    images = load_dataset(config)
-    # images_variance = np.var(images / 255.0)
+    dataset_config = config["dataset"]
+    training_config = config["training"]
 
-    # Build and train model, TODO: Add latent_dim to config file
-    # model, encoder, decoder = build_model(latent_dim=1024)
-    # model = VQVAETrainer(images_variance)
-    # model.compile(optimizer=tf.keras.optimizers.Adam(3e-4))
+    # Load the dataset
+    images = load_dataset(dataset_config)
 
-    # history = model.fit(
-    #     images,
-    #     images,
-    #     batch_size=config["batch_size"],
-    #     epochs=config["epochs"],
-    #     validation_split=config["validation_split"], 
-    #     shuffle=True,
-    #     callbacks=[
-    #         tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=(config["epochs"] // 50), restore_best_weights=True, verbose=1),
-    #     ],
-    # )
+    # Build and train model
+    model, _, _ = build_model()
+    # TODO: Save history to file
+    history = model.fit(
+        images,
+        images,
+        batch_size=training_config["batch_size"],
+        epochs=training_config["epochs"],
+        shuffle=True,
+    )
+
+    # Save the model
+    # TODO: Add checkpointing, save models every X epochs to an directory corresponding to a training run
+    # TODO: Use callbacks to save model checkpoints, and produce example inference image (to show progression)
+    checkpoint_directory = Path(training_config["checkpoint_directory"])
+    checkpoint_directory.mkdir(exist_ok=True)
+    model.save(
+        checkpoint_directory
+        / ("model_" + datetime.now().strftime("%Y-%m-%d-%H:%M:%S%z") + ".keras")
+    )
 
     # # Save the model
     # # TODO: Add checkpointing, save models every X epochs to an directory corresponding to a training run
