@@ -63,14 +63,6 @@ def build_autoencoder(encoder, decoder, input_shape=(128, 128, 3), latent_dim=25
     encoder_inputs = Input(shape=input_shape, name='autoencoder_input')
     z_mean, z_log_var = encoder(encoder_inputs)
 
-    # # Reparameterization trick to sample z
-    # def sampling(args):
-    #     z_mean, z_log_var = args
-    #     batch = K.shape(z_mean)[0]
-    #     dim = K.int_shape(z_mean)[1]
-    #     epsilon = K.random_normal(shape=(batch, dim))
-    #     return z_mean + K.exp(0.5 * z_log_var) * epsilon
-
     # Apply sampling function
     z = Lambda(sampling, output_shape=(latent_dim,), name='z')([z_mean, z_log_var])
 
@@ -78,7 +70,7 @@ def build_autoencoder(encoder, decoder, input_shape=(128, 128, 3), latent_dim=25
     reconstruction = decoder(z)
 
     # Build the VAE model
-    vae = Model(inputs=encoder_inputs, outputs=reconstruction, name='vae_mlp')
+    vae = Model(inputs=encoder_inputs, outputs=reconstruction, name='vae')
 
     # Add VAE loss
     reconstruction_loss = mse(K.flatten(encoder_inputs), K.flatten(reconstruction))
@@ -99,9 +91,3 @@ def build_model(latent_dim=256):
     opt = Adam(3e-4)
     autoencoder.compile(opt)
     return autoencoder, encoder, decoder
-
-# vae, encoder, decoder = build_model(latent_dim=512)
-
-# encoder.summary()
-# decoder.summary()
-# vae.summary()
