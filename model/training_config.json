@@ -4,5 +4,6 @@
   "dataset_cache": "./dataset_128_cache.npy",
   "dataset_directory": "/datasets/poke128",
   "epochs": 300,
-  "validation_split": 0.1
+  "validation_split": 0.1,
+  "train_latent_mode": false
 }
